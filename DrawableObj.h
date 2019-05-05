@@ -11,11 +11,13 @@
 *//////////////////////////////////////////////////
 class DrawableObj
 {
-	friend class WDManager;
+	friend class GroupObj;
 public:
 	DrawableObj();
 	DrawableObj(char * name);
 	DrawableObj(char * name, int width, int height);
+
+	DrawableObj & operator=(const DrawableObj & rhs);
 
 	void SetName(char * name);
 	void SetSrc(char * src);

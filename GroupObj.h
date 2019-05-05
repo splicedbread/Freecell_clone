@@ -10,7 +10,8 @@
 		that can be used for interaction
 		with the window.
 *//////////////////////////////////////////////
-#include "LStack.h"
+#include "LinkedList.h"
+#include "DrawableObj.h"
 
 class GroupObj
 {
@@ -18,7 +19,16 @@ public:
 	GroupObj();
 	GroupObj(char * name);
 	GroupObj(const GroupObj & cpy);
+	~GroupObj();
+
+	GroupObj & operator=(const GroupObj & rhs);
+
+	void Insert(const DrawableObj & itm);
+	void Remove(char * name);
+
+	DrawableObj & GetDrawable(char * name) const;
 
 private:
+	LinkedList<DrawableObj> m_group;
 };
 #endif // !GROUPOBJ_H

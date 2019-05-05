@@ -15,7 +15,7 @@
 		as managing the window properties.
 */////////////////////////////////////////////////////
 #include <SFML/Graphics.hpp>
-#include "DrawableObj.h"
+#include "GroupObj.h"
 #include "Array.h"
 
 using namespace sf;
@@ -54,6 +54,6 @@ private:
 
 	int m_c_objs;
 
-	Array<DrawableObj> m_objs;
+	Array<GroupObj> m_objs;
 };
 #endif // !WDMANAGER_H

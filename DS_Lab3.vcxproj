@@ -128,14 +128,26 @@
     <ClInclude Include="Array.h" />
     <ClInclude Include="card.h" />
     <ClInclude Include="deck.h" />
+    <ClInclude Include="DrawableObj.h" />
     <ClInclude Include="Exception.h" />
+    <ClInclude Include="Freecell.h" />
+    <ClInclude Include="GroupObj.h" />
+    <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="LStack.h" />
     <ClInclude Include="MySwap.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="Stack.h" />
+    <ClInclude Include="WDManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="card.cpp" />
     <ClCompile Include="deck.cpp" />
+    <ClCompile Include="DrawableObj.cpp" />
     <ClCompile Include="Exception.cpp" />
+    <ClCompile Include="Freecell.cpp" />
+    <ClCompile Include="GroupObj.cpp" />
     <ClCompile Include="Lab3testing.cpp" />
+    <ClCompile Include="WDManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
