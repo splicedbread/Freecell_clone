@@ -25,10 +25,10 @@ public:
 	void Reset();
 	void Empty();
 	void Randomise();
-	void DisplayExperimental();
 	int GetSize();
 private:
 	void Load();
+	int m_c_cards;
 	Array<Card> m_deck;
 	std::default_random_engine gen;
 };

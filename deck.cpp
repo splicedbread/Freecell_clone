@@ -1,8 +1,9 @@
 #include "deck.h"
 //default ctor
-Deck::Deck()
+Deck::Deck() : m_c_cards(0)
 {
 	//Load the deck with the cards
+	m_deck.SetLength(52); //set the length of the array to 52
 	Load();
 }
 
@@ -21,8 +22,8 @@ Card Deck::Draw()
 	//Drawing the last element, and returning it, then deleting it
 	//from the deck, will reduce the deck size for the next draw.
 	Card tempCard(Card::SPADE, Card::ACE);
-	tempCard = m_deck[m_deck.GetElements() - 1];
-	m_deck.Delete(tempCard);
+	tempCard = m_deck[m_c_cards - 1];
+	m_c_cards--; //decrease how 'many' cards there is in the deck
 	return tempCard;
 }
 
@@ -31,6 +32,7 @@ Card Deck::Draw()
 *///////////////////////////////////////////////////////////////////
 void Deck::Reset()
 {
+	m_c_cards = 0;
 	Empty();
 	Load();
 }
@@ -39,7 +41,8 @@ void Deck::Reset()
 *//////////////////////////////////////////
 void Deck::Empty()
 {
-	m_deck.Empty();
+	m_deck.SetLength(0); //clear it
+	m_deck.SetLength(52); //set the size back to 52
 }
 
 /*////////////////////////////////////////////////////////////
@@ -56,9 +59,9 @@ void Deck::Randomise()
 	gen.seed(seed);
 
 	int rngCardNum;
-	std::uniform_int_distribution<int> card_distribution(0, m_deck.GetElements() - 1);
+	std::uniform_int_distribution<int> card_distribution(0, m_deck.GetLength() - 1);
 
-	for (int i = 0; i < m_deck.GetElements(); i++)
+	for (int i = 0; i < m_deck.GetLength(); i++)
 	{
 		rngCardNum = card_distribution(gen);//generate an element from the deck
 		Swap(i, rngCardNum); //swap those elements with the current selected one
@@ -66,27 +69,10 @@ void Deck::Randomise()
 	}
 }
 
-/*
-	Used for testing to see what the deck is looking like, should not be called
-	outside of testing
-*/
-void Deck::DisplayExperimental()
-{
-	std::cout << "Displaying the deck from the bottom up" << std::endl;
-	for (int i = 0; i < m_deck.GetElements(); i++)
-	{
-		std::cout << "Card [" << i + 1 << "] ";
-
-		std::cout << m_deck[i];
-		std::cout << std::endl;
-		
-	}
-}
-
 //Return how many cards are in the deck
 int Deck::GetSize()
 {
-	return m_deck.GetElements();
+	return m_c_cards;
 }
 
 /*////////////////////////////////////////////////////////////////////////////
@@ -103,7 +89,8 @@ void Deck::Load()
 		{
 			tempCard.SetFace(static_cast<Card::CardType>(j)); //sets face between ace and king
 			tempCard.SetSuit(static_cast<Card::CardSuit>(i)); //sets suit between spade and diamond
-			m_deck.Insert(tempCard); //inserts the temp card into the dynamic array
+			m_deck[m_c_cards] = tempCard; //inserts card at m_c_cards index
+			m_c_cards++; //a new card has been added, so increment the number
 		}
 	}
 }
