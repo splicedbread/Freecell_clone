@@ -125,7 +125,15 @@ bool DrawableObj::operator==(const DrawableObj & rhs)
 {
 	return ((strcmp(m_name, rhs.m_name) == 0) 
 			&& (strcmp(m_src_path, rhs.m_src_path) == 0)
-			&& (strcmp());
+			&& (strcmp(m_group, rhs.m_group) == 0)
+			&& m_width == rhs.m_width && m_height == rhs.m_height
+			&& m_Xpos_rel == rhs.m_Xpos_rel && m_Ypos_rel == rhs.m_Ypos_rel);
+}
+
+//not comparison operator overload
+bool DrawableObj::operator!=(const DrawableObj & rhs)
+{
+	return !(*this == rhs);
 }
 
 /*////////////////////////////////////////////////

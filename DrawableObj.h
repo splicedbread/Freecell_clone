@@ -21,6 +21,7 @@ public:
 	
 	DrawableObj & operator=(const DrawableObj & rhs);
 	bool operator==(const DrawableObj & rhs);
+	bool operator!=(const DrawableObj & rhs);
 
 
 	void SetName(const char * name);
