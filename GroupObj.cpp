@@ -90,21 +90,98 @@ GroupObj & GroupObj::operator=(const GroupObj & rhs)
 		and updates that objects group name
 		to the current group name
 		(helps for identification)
+
+		throws an exception if an obj
+		with the same name is found
 *///////////////////////////////////////////
 void GroupObj::Insert(const DrawableObj & itm)
 {
+	bool similar = false;
+
+	Node<DrawableObj> * travel;
+	travel = m_group.GetHead();
+
+	if (strcmp(travel->GetData().m_name, itm.m_name) == 0)
+	{
+		//if the head contains the data, we already found it
+		similar = true;
+	}
+
+	while (!similar && travel != nullptr)
+	{
+		//if the name is the same
+		if (strcmp(travel->GetData().m_name, itm.m_name) == 0)
+		{
+			similar = true;
+		}
+		else
+		{
+			travel = travel->GetNext();
+		}
+	}
+
+	if (similar)
+	{
+		//if there is already an item with the existing name
+		//throw an exception
+		throw Exception("Exception: object already in group");
+	}
 	m_group.Append(itm); //insert the constant referrence into the group
 	m_group.Last().SetGroup(m_name); //change the group to the group name
 }
 
-/*
+/*///////////////////////////////////////
 	Remove
 		removes an object from the group
 		(object must have a name)
-*/
+
+		throws an exception if the group
+		is empty
+		throws if the item is not found
+
+		The idea is that each DrawableObj
+		has a unique name and can be found
+*////////////////////////////////////////
 void GroupObj::Remove(const char * name)
 {
+	if (m_group.IsEmpty())
+	{
+		throw Exception("Exception: empty group, cannot remove");
+	}
 
+	Node<DrawableObj> * travel;
+	travel = m_group.GetHead();
+	bool found = false;
+
+	if (strcmp(travel->GetData().m_name, name) == 0)
+	{
+		//if the head contains the data, we already found it
+		found = true;
+	}
+
+	//try finding the same name in the group
+	while (!found && travel != nullptr)
+	{
+		//if the name is the same
+		if (strcmp(travel->GetData().m_name, name) == 0)
+		{
+			found = true;
+		}
+		else
+		{
+			travel = travel->GetNext();
+		}
+	}
+
+	//after finding it, now remove it
+	//otherwise if not found throw an exception
+	if (!found)
+	{
+		throw Exception("Exception: obj not in group");
+	}
+	
+	//if found, extract the DrawableObj
+	m_group.Extract(travel->GetData());	
 }
 
 
@@ -120,15 +197,37 @@ void GroupObj::SetPos(int x, int y)
 	m_Ypos = y;
 }
 
-/*
+/*////////////////////////////////////////////
 	SetName
 		Sets the name of the
 		group, also renames Drawable objects
 		group names
-*/
+*/////////////////////////////////////////////
 void GroupObj::SetName(const char * name)
 {
+	if (name != nullptr)
+	{
+		//we want to set the group name
+		//to the specified argument
+		delete m_name;
+		m_name = new char[strlen(name) + 1];
+		strcpy(m_name, name);
 
+		//after the name is set, we 
+		//would like to update existing
+		//Drawable objects with that group name
+
+		Node<DrawableObj> * travel;
+		travel = m_group.GetHead();
+
+		while (travel != nullptr)
+		{
+			//set the group name in drawable obj
+			travel->GetData().SetGroup(name);
+			//travel along the groups linked list
+			travel = travel->GetNext();
+		}
+	}
 }
 
 //getters
@@ -152,9 +251,45 @@ const char * GroupObj::GetName() const
 	GetDrawable
 		returns a reference to a 
 		drawable object within the group
-		returns nullptr if nothing was found
+		throws exception if not found
 *////////////////////////////////////////////
 DrawableObj & GroupObj::GetDrawable(const char * name) const
 {
+	if (m_group.IsEmpty())
+	{
+		throw Exception("Exception: empty group, cannot retrieve");
+	}
 
+	Node<DrawableObj> * travel;
+	travel = m_group.GetHead();
+	bool found = false;
+
+	if (strcmp(travel->GetData().m_name, name) == 0)
+	{
+		//if the head contains the data, we already found it
+		found = true;
+	}
+
+	//try finding the same name in the group
+	while (!found && travel != nullptr)
+	{
+		//if the name is the same
+		if (strcmp(travel->GetData().m_name, name) == 0)
+		{
+			found = true;
+		}
+		else
+		{
+			travel = travel->GetNext();
+		}
+	}
+
+	//after finding it, now remove it
+	//otherwise if not found throw an exception
+	if (!found)
+	{
+		throw Exception("Exception: obj not in group");
+	}
+
+	return travel->GetData();
 }
