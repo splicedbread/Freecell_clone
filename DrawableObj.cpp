@@ -120,6 +120,14 @@ DrawableObj & DrawableObj::operator=(const DrawableObj & rhs)
 	return *this;
 }
 
+//comparison operator overload
+bool DrawableObj::operator==(const DrawableObj & rhs)
+{
+	return ((strcmp(m_name, rhs.m_name) == 0) 
+			&& (strcmp(m_src_path, rhs.m_src_path) == 0)
+			&& (strcmp());
+}
+
 /*////////////////////////////////////////////////
 	SetName
 		takes in a name as the new obj name 

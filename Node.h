@@ -25,7 +25,7 @@ public:
 	bool operator==(const Node<T> & rhs);
 	Node<T> * GetNext() const;
 	Node<T> * GetPrevious() const;
-	T & GetData() const;
+	T & GetData();
 private:
 	Node<T> * m_next;
 	Node<T> * m_prev;
@@ -76,7 +76,7 @@ Node<T> * Node<T>::GetPrevious() const
 
 //GetData return the data from node
 template <typename T>
-T Node<T>::GetData() const
+T & Node<T>::GetData()
 {
 	return m_data;
 }
