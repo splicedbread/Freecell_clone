@@ -14,14 +14,16 @@ class DrawableObj
 	friend class GroupObj;
 public:
 	DrawableObj();
-	DrawableObj(char * name);
-	DrawableObj(char * name, int width, int height);
-
+	DrawableObj(const char * name);
+	DrawableObj(const char * name, int width, int height);
+	~DrawableObj();
+	
 	DrawableObj & operator=(const DrawableObj & rhs);
 
-	void SetName(char * name);
-	void SetSrc(char * src);
-	void SetGroup(char * group);
+
+	void SetName(const char * name);
+	void SetSrc(const char * src);
+	void SetGroup(const char * group);
 
 	void SetDims(int x, int y); //size in pixels
 	void SetPos(int x, int y); //using top left as origin
