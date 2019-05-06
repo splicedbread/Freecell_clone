@@ -26,8 +26,8 @@ public:
 	~LinkedList();
 
 	bool IsEmpty() const;
-	const T & First() const;
-	const T & Last() const;
+	T & First() const;
+	T & Last() const;
 
 	void Prepend(T in);
 	void Append(T in);
@@ -124,13 +124,13 @@ bool LinkedList<T>::IsEmpty() const
 	node in the list respectfully.
 *////////////////////////////////////////////////////
 template <typename T>
-const T & LinkedList<T>::First() const
+T & LinkedList<T>::First() const
 {
 	return m_head->m_data;
 }
 
 template <typename T>
-const T & LinkedList<T>::Last() const
+T & LinkedList<T>::Last() const
 {
 	return m_tail->m_data;
 }

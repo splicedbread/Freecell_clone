@@ -15,20 +15,31 @@
 
 class GroupObj
 {
+	friend class WDManager;
 public:
 	GroupObj();
-	GroupObj(char * name);
+	GroupObj(const char * name);
 	GroupObj(const GroupObj & cpy);
 	~GroupObj();
 
 	GroupObj & operator=(const GroupObj & rhs);
 
 	void Insert(const DrawableObj & itm);
-	void Remove(char * name);
+	void Remove(const char * name);
 
-	DrawableObj & GetDrawable(char * name) const;
+	void SetPos(int x, int y);
+	void SetName(const char * name);
+
+	int GetXPos() const;
+	int GetYPos() const;
+	const char * GetName() const;
+
+	DrawableObj & GetDrawable(const char * name) const;
 
 private:
+	char * m_name;
+	int m_Xpos;
+	int m_Ypos;
 	LinkedList<DrawableObj> m_group;
 };
 #endif // !GROUPOBJ_H
