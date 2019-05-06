@@ -33,6 +33,31 @@ DrawableObj::DrawableObj(const char * name, int width, int height) : m_name(null
 	}
 }
 
+//cpy ctor
+DrawableObj::DrawableObj(const DrawableObj & cpy) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_width(cpy.m_width), m_height(cpy.m_height), m_Ypos_rel(cpy.m_Ypos_rel), m_Xpos_rel(cpy.m_Xpos_rel)
+{
+	//copy the repective names over
+	if (cpy.m_name != nullptr)
+	{
+		m_name = new char[strlen(cpy.m_name) + 1];
+		strcpy(m_name, cpy.m_name);
+	}
+
+	//group
+	if (cpy.m_group != nullptr)
+	{
+		m_group = new char[strlen(cpy.m_group) + 1];
+		strcpy(m_group, cpy.m_group);
+	}
+
+	//src
+	if (cpy.m_src_path != nullptr)
+	{
+		m_src_path = new char[strlen(cpy.m_src_path) + 1];
+		strcpy(m_src_path, cpy.m_src_path);
+	}
+}
+
 //dtor
 DrawableObj::~DrawableObj()
 {

@@ -16,6 +16,7 @@ public:
 	DrawableObj();
 	DrawableObj(const char * name);
 	DrawableObj(const char * name, int width, int height);
+	DrawableObj(const DrawableObj & cpy);
 	~DrawableObj();
 	
 	DrawableObj & operator=(const DrawableObj & rhs);
