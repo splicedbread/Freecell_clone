@@ -25,7 +25,7 @@ public:
 	bool operator==(const Node<T> & rhs);
 	Node<T> * GetNext() const;
 	Node<T> * GetPrevious() const;
-	T GetData() const;
+	T & GetData() const;
 private:
 	Node<T> * m_next;
 	Node<T> * m_prev;
