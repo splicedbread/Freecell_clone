@@ -26,9 +26,12 @@ WDManager::WDManager(int x, int y) : m_x_size(MIN_X_RES), m_y_size(MIN_Y_RES), m
 
 	//gives a loose basis that their quotient is within the 16:9 ratio (sorta)
 	//check to make sure the resolution is not bigger than the desktop resolution
-	if (VideoMode::getDesktopMode().width <= x && VideoMode::getDesktopMode().height <= y && y > 0)
+
+	if (VideoMode::getDesktopMode().width >= x && VideoMode::getDesktopMode().height >= y && y > 0)
 	{
-		if (static_cast<double>(x / y) >= 1.6 && static_cast<double>(x / y) <= 1.8 && x >= MIN_X_RES && y >= MIN_Y_RES)
+		if (static_cast<double>(x) / static_cast<double>(y) >= 1.6 
+			&& static_cast<double>(x) / static_cast<double>(y) <= 1.8 
+			&& x >= MIN_X_RES && y >= MIN_Y_RES)
 		{
 			if ((x % R_ASPECT_X) == 0 && (y % R_ASPECT_Y) == 0)
 			{
@@ -36,9 +39,12 @@ WDManager::WDManager(int x, int y) : m_x_size(MIN_X_RES), m_y_size(MIN_Y_RES), m
 				m_x_size = x;
 				m_y_size = y;
 
+				std::cout << "resized the window .\n";
+
 				//WARNING, SIZES LARGER THAN THE DESKTOP RESOLTION MAY NOT WORK,
 				//WILL INCORPORATE THAT AT SOME POINT
 			}
+
 		}
 	}
 
@@ -86,6 +92,7 @@ WDManager & WDManager::operator=(const WDManager & rhs)
 		m_x_size = rhs.m_x_size;
 		m_y_size = rhs.m_y_size;
 
+		m_window.close();
 		m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
 	}
 	return *this;
@@ -122,6 +129,7 @@ void WDManager::SetDimension(int x, int y)
 
 	if (resized)
 	{
+		m_window.close();
 		m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
 	}
 }
@@ -138,7 +146,7 @@ void WDManager::SetTitle(const char * title)
 		delete m_title;
 		m_title = new char[strlen(title) + 1];
 		strcpy(m_title, title);
-		m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
+		m_window.setTitle(String(m_title));
 	}
 }
 

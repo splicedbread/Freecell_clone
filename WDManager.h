@@ -17,6 +17,8 @@
 #include <SFML/Graphics.hpp>
 #include "GroupObj.h"
 
+#include <iostream>
+
 #define MIN_X_RES 848
 #define MIN_Y_RES 480
 
