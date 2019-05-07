@@ -40,7 +40,7 @@ public:
 	int GetWidth() const;
 	int GetHeight() const;
 	const char * GetTitle() const;
-	const RenderWindow & GetWindow() const;
+	RenderWindow & GetWindow();
 
 
 
