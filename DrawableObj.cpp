@@ -8,13 +8,13 @@
 #include "DrawableObj.h"
 
 //default ctor
-DrawableObj::DrawableObj() : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_width(0), m_height(0), m_Ypos_rel(0), m_Xpos_rel(0)
+DrawableObj::DrawableObj() : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_scale(1.0f), m_Ypos_rel(0), m_Xpos_rel(0)
 {
 
 }
 
 //1 arg ctor
-DrawableObj::DrawableObj(const char * name) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_width(0), m_height(0), m_Ypos_rel(0), m_Xpos_rel(0)
+DrawableObj::DrawableObj(const char * name) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_scale(1.0f), m_Ypos_rel(0), m_Xpos_rel(0)
 {
 	if (name != nullptr)
 	{
@@ -24,17 +24,22 @@ DrawableObj::DrawableObj(const char * name) : m_name(nullptr), m_src_path(nullpt
 }
 
 //special multi arg ctor
-DrawableObj::DrawableObj(const char * name, int width, int height) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_width(width), m_height(height), m_Ypos_rel(0), m_Xpos_rel(0)
+DrawableObj::DrawableObj(const char * name, float scale) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_scale(scale), m_Ypos_rel(0), m_Xpos_rel(0)
 {
 	if (name != nullptr)
 	{
 		m_name = new char[strlen(name) + 1];
 		strcpy(m_name, name);
 	}
+
+	if (scale < 0.0)
+	{
+		m_scale = 1.0f;
+	}
 }
 
 //cpy ctor
-DrawableObj::DrawableObj(const DrawableObj & cpy) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_width(cpy.m_width), m_height(cpy.m_height), m_Ypos_rel(cpy.m_Ypos_rel), m_Xpos_rel(cpy.m_Xpos_rel)
+DrawableObj::DrawableObj(const DrawableObj & cpy) : m_name(nullptr), m_src_path(nullptr), m_group(nullptr), m_scale(cpy.m_scale), m_Ypos_rel(cpy.m_Ypos_rel), m_Xpos_rel(cpy.m_Xpos_rel)
 {
 	//copy the repective names over
 	if (cpy.m_name != nullptr)
@@ -61,8 +66,7 @@ DrawableObj::DrawableObj(const DrawableObj & cpy) : m_name(nullptr), m_src_path(
 //dtor
 DrawableObj::~DrawableObj()
 {
-	m_width = 0;
-	m_height = 0;
+	m_scale = 1.0f;
 	m_Xpos_rel = 0;
 	m_Ypos_rel = 0;
 
@@ -112,8 +116,7 @@ DrawableObj & DrawableObj::operator=(const DrawableObj & rhs)
 		}
 
 		//make sure to copy the rest of the members
-		m_width = rhs.m_width;
-		m_height = rhs.m_height;
+		m_scale = rhs.m_scale;
 		m_Xpos_rel = rhs.m_Xpos_rel;
 		m_Ypos_rel = rhs.m_Ypos_rel;
 	}
@@ -126,7 +129,7 @@ bool DrawableObj::operator==(const DrawableObj & rhs)
 	return ((strcmp(m_name, rhs.m_name) == 0) 
 			&& (strcmp(m_src_path, rhs.m_src_path) == 0)
 			&& (strcmp(m_group, rhs.m_group) == 0)
-			&& m_width == rhs.m_width && m_height == rhs.m_height
+			&& m_scale == rhs.m_scale
 			&& m_Xpos_rel == rhs.m_Xpos_rel && m_Ypos_rel == rhs.m_Ypos_rel);
 }
 
@@ -188,13 +191,15 @@ void DrawableObj::SetGroup(const char * group)
 		of the object. not the
 		position of the object
 *//////////////////////////////////
-void DrawableObj::SetDims(int x, int y)
+void DrawableObj::SetScale(float scale)
 {
 	//allowing negative values is okay,
 	//because that would indicate a transformation
 	//on the object (inversion)
-	m_width = x;
-	m_height = y;
+	if (scale > 0)
+	{
+		m_scale = scale;
+	}
 }
 
 /*///////////////////////////////////////////
@@ -240,14 +245,9 @@ const char * DrawableObj::GetGroup() const
 	return m_group;
 }
 
-int DrawableObj::GetWidth() const
+float DrawableObj::GetScale() const
 {
-	return m_width;
-}
-
-int DrawableObj::GetHeight() const
-{
-	return m_height;
+	return m_scale;
 }
 
 int DrawableObj::GetXpos() const

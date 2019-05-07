@@ -15,7 +15,7 @@ class DrawableObj
 public:
 	DrawableObj();
 	DrawableObj(const char * name);
-	DrawableObj(const char * name, int width, int height);
+	DrawableObj(const char * name, float scale);
 	DrawableObj(const DrawableObj & cpy);
 	~DrawableObj();
 	
@@ -28,15 +28,14 @@ public:
 	void SetSrc(const char * src);
 	void SetGroup(const char * group);
 
-	void SetDims(int x, int y); //size in pixels
+	void SetScale(float scale); //scale
 	void SetPos(int x, int y); //using top left as origin
 
 	const char * GetName() const;
 	const char * GetSrc() const;
 	const char * GetGroup() const;
 	
-	int GetWidth() const;
-	int GetHeight() const;
+	float GetScale() const;
 	int GetXpos() const;
 	int GetYpos() const;
 
@@ -45,8 +44,7 @@ private:
 	char * m_src_path;
 	char * m_group;
 
-	int m_width;
-	int m_height;
+	float m_scale;
 
 	int m_Xpos_rel; //relative positioning
 	int m_Ypos_rel;

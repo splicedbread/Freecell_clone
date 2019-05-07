@@ -101,7 +101,7 @@ void GroupObj::Insert(const DrawableObj & itm)
 	Node<DrawableObj> * travel;
 	travel = m_group.GetHead();
 
-	if (strcmp(travel->GetData().m_name, itm.m_name) == 0)
+	if (travel != nullptr && strcmp(travel->GetData().m_name, itm.m_name) == 0)
 	{
 		//if the head contains the data, we already found it
 		similar = true;

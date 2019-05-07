@@ -16,6 +16,8 @@ WDManager::WDManager() : m_x_size(MIN_X_RES), m_y_size(MIN_Y_RES), m_title(nullp
 	strcpy(m_title, "Freecell - The Unoriginal Card Game - JV");
 
 	m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
+	m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+	Update();
 }
 
 //2 arg ctor
@@ -49,6 +51,8 @@ WDManager::WDManager(int x, int y) : m_x_size(MIN_X_RES), m_y_size(MIN_Y_RES), m
 	}
 
 	m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
+	m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+	Update();
 }
 
 //copy ctor
@@ -64,6 +68,8 @@ WDManager::WDManager(const WDManager & cpy) : m_x_size(cpy.m_x_size), m_y_size(c
 	//dont need as much as a mess here because the default handles a lot
 
 	m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
+	m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+	Update();
 }
 
 //dtor
@@ -94,6 +100,8 @@ WDManager & WDManager::operator=(const WDManager & rhs)
 
 		m_window.close();
 		m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
+		m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+		Update();
 	}
 	return *this;
 }
@@ -131,6 +139,8 @@ void WDManager::SetDimension(int x, int y)
 	{
 		m_window.close();
 		m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
+		m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+		Update();
 	}
 }
 
@@ -185,10 +195,50 @@ RenderWindow & WDManager::GetWindow()
 	that other objects may be there,
 	drawing to the buffer effectively is like a stack
 	The oldest items are at the bottom
+
+	Throws an exception if a texture is not found
 */////////////////////////////////////////////////////
 void WDManager::DrawObj(const GroupObj & obj)
 {
+	Node<DrawableObj>* travel;
+	travel = obj.m_group.GetHead();
 
+	//a while loop to draw all objects in the group
+	while (travel != nullptr)
+	{
+		//New Texture Obj
+		Texture texture;
+		if (!texture.loadFromFile(travel->GetData().GetSrc()))
+		{
+			//texture loading failed, throw an exception
+			throw Exception("Exception: Failed to load image from file.");
+		}
+
+		//after loading the texture, we must apply it into a sprite, so we can manipulate
+		//it
+		Sprite spr;
+		spr.setTexture(texture);
+
+		/*
+			after making the sprite with a texture, position it
+			first arg is the x position, the second is the y pos.
+			it is assumed that the position for the objects in the group
+			are relative to the first member when constructing. 
+			first it takes the group position (position of the obj)
+			plus the individual postion of the elements
+		*/
+		spr.setScale(travel->GetData().GetScale(), travel->GetData().GetScale());
+
+		spr.setPosition(static_cast<float>(obj.m_Xpos + travel->GetData().GetXpos()), 
+						static_cast<float>(obj.m_Ypos + travel->GetData().GetYpos()));
+
+		//after setting the position, update the window
+		m_window.draw(spr);
+
+
+		//continue traveling with travel node
+		travel = travel->GetNext();
+	}
 }
 
 /*////////////////////////////////////////////
@@ -204,7 +254,8 @@ void WDManager::DrawObj(const GroupObj & obj)
 *//////////////////////////////////////////////
 void WDManager::Update()
 {
-
+	m_window.display();
+	Wipe();
 }
 
 /*////////////////////////////////////
