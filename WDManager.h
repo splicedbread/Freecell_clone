@@ -16,11 +16,14 @@
 */////////////////////////////////////////////////////
 #include <SFML/Graphics.hpp>
 #include "GroupObj.h"
-#include "Array.h"
+
+#define MIN_X_RES 848
+#define MIN_Y_RES 480
+
+#define R_ASPECT_X 16
+#define R_ASPECT_Y 9
 
 using namespace sf;
-
-#define WD_ALLOC_SIZE 5
 
 class WDManager
 {
@@ -32,17 +35,20 @@ public:
 
 	WDManager & operator=(const WDManager & rhs);
 
-	void SetWidth(int x);
-	void SetHeight(int y);
-	void SetTitle(char * title);
-	void SetWindow(const RenderWindow & win);
+	void SetDimension(int x, int y);
+	void SetTitle(const char * title);
 
 	int GetWidth() const;
 	int GetHeight() const;
 	const char * GetTitle() const;
 	RenderWindow & GetWindow();
 
+	//most importantly
+	void DrawObj(const GroupObj & obj);
 
+	//secondly
+	void Update();
+	void Wipe();
 
 private:
 	int m_x_size;
@@ -51,9 +57,5 @@ private:
 	char * m_title;
 
 	RenderWindow m_window;
-
-	int m_c_objs;
-
-	Array<GroupObj> m_objs;
 };
 #endif // !WDMANAGER_H
