@@ -7,6 +7,7 @@
 *////////////////////////////////////////////////////
 
 #define RES_CARD "./Resources/CardBlank.png"
+#define RES_CARD_B "./Resources/CardSmall.png"
 #define RES_CLUB "./Resources/Club.png"
 #define RES_SPADE "./Resources/Spade.png"
 #define RES_HEART "./Resources/Heart.png"
