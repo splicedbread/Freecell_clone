@@ -119,27 +119,35 @@ void WDManager::SetDimension(int x, int y)
 	bool resized = false;
 	//gives a loose basis that their quotient is within the 16:9 ratio (sorta)
 	//check to make sure the resolution is not bigger than the desktop resolution
-	if (VideoMode::getDesktopMode().width <= x && VideoMode::getDesktopMode().height <= y && y > 0)
+	if (VideoMode::getDesktopMode().width >= x && VideoMode::getDesktopMode().height >= y && y > 0)
 	{
-		if (static_cast<double>(x / y) >= 1.6 && static_cast<double>(x / y) <= 1.8 && x >= MIN_X_RES && y >= MIN_Y_RES)
+		if (static_cast<double>(x) / static_cast<double>(y) >= 1.6
+			&& static_cast<double>(x) / static_cast<double>(y) <= 1.8
+			&& x >= MIN_X_RES && y >= MIN_Y_RES)
 		{
 			if ((x % R_ASPECT_X) == 0 && (y % R_ASPECT_Y) == 0)
 			{
 				//any 16:9 ratio is supported
 				m_x_size = x;
 				m_y_size = y;
+
 				resized = true;
+
 				//WARNING, SIZES LARGER THAN THE DESKTOP RESOLTION MAY NOT WORK,
 				//WILL INCORPORATE THAT AT SOME POINT
 			}
+
 		}
 	}
 
+	if (resized && m_window.isOpen())
+	{
+		m_window.close(); //close the window first
+	}
+	
 	if (resized)
 	{
-		m_window.close();
 		m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
-		m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
 		Update();
 	}
 }

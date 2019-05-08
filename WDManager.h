@@ -20,7 +20,7 @@
 #include <iostream>
 
 #define MIN_X_RES 848
-#define MIN_Y_RES 480
+#define MIN_Y_RES 477
 
 #define R_ASPECT_X 16
 #define R_ASPECT_Y 9
