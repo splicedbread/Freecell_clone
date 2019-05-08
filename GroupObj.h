@@ -34,6 +34,8 @@ public:
 	int GetYPos() const;
 	const char * GetName() const;
 
+	void ResetGroup();
+
 	DrawableObj & GetDrawable(const char * name) const;
 
 private:

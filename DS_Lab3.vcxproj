@@ -141,6 +141,7 @@
     <ClInclude Include="DrawableObj.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Freecell.h" />
+    <ClInclude Include="FreeCellResources.h" />
     <ClInclude Include="GroupObj.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="LStack.h" />

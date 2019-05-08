@@ -1,6 +1,10 @@
 #ifndef CARD_H
 #define CARD_H
 #include <iostream>
+#include "GroupObj.h"
+
+#define R_PADDING 5
+
 /*////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	Author: Jacob Vanderkarr
 	Date: 12/2/18
@@ -33,9 +37,15 @@ public:
 
 	CardSuit GetSuit() const;
 	CardType GetFace() const;
+	GroupObj & GetCard();
+	void SetScale(float scale);
 	void SetSuit(CardSuit suit);
 	void SetFace(CardType face);
 private:
+	void UpdateCard();
+
+	float m_scale;
+	GroupObj m_card;
 	CardSuit m_suit;
 	CardType m_face;
 };

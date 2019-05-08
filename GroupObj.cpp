@@ -247,6 +247,17 @@ const char * GroupObj::GetName() const
 	return m_name;
 }
 
+/*///////////////////////////////////////
+	ResetGroup
+		resets the group so its ready for
+		new input
+*////////////////////////////////////////
+void GroupObj::ResetGroup()
+{
+	m_group.Purge();
+}
+
+
 /*///////////////////////////////////////////
 	GetDrawable
 		returns a reference to a 
