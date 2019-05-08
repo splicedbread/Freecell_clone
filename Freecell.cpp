@@ -85,6 +85,8 @@ void Freecell::StartGame()
 	//setup phase
 	m_Running = true;
 
+	//if cheat mode is enabled, dont randomise the
+	//deck, because LoadDeck() does something special
 	if (m_cheat_mode)
 	{
 		m_deck.Reset();
@@ -202,9 +204,22 @@ int Freecell::MovementCheck()
 */
 bool Freecell::CheckWinCond()
 {
-	bool cond = false;
+	bool cond = true;
 
+	//check if any cards are left in freecells
+	if (m_f_count != 0)
+	{
+		cond = false;
+	}
 	
+	//check if any cards are left on the board.
+	for (int i = 0; i < m_columns.GetLength(); i++)
+	{
+		if (!m_columns[i].IsEmpty())
+		{
+			cond = false;
+		}
+	}
 
 	return cond;
 }
@@ -214,6 +229,10 @@ bool Freecell::CheckWinCond()
 		after a valid movement check,
 		move the amount of cards
 		requested to the new location
+
+		0-7 is the board columns
+		8 is freecells (checks if there is open space first)
+		9 is homecells (checks if just one card is being moved)
 */
 void Freecell::MoveTo(int numOfCards, int column)
 {
