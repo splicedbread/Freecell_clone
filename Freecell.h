@@ -38,6 +38,12 @@ public:
 
 	void MoveTo(int numOfCards, int column);
 
+	//Display helper functions
+	void DrawGhost();
+	void DrawFree();
+	void DrawHome();
+	void DrawColumns();
+
 private:
 	//game loop initiator
 	void StartGame(); //private so you are forced to choose a window size first
@@ -53,6 +59,13 @@ private:
 	int m_Mouse_x;
 	int m_Mouse_y;
 
+	//keep track of user selection with how
+	//many cards are being moved and which column is 
+	//cards moving to
+	int m_numCards;
+	int m_new_col;
+	int m_old_col;
+
 	//window
 	WDManager m_window;
 
@@ -60,7 +73,6 @@ private:
 	bool m_Running;
 	bool m_cheat_mode;
 	bool m_m1_pressed;
-	bool m_m1_released;
 
 	int m_input_result;
 	int m_check_result;
@@ -76,6 +88,9 @@ private:
 	Array<Stack<Card>> m_homecells;
 	Array<LStack<Card>> m_columns;
 	LStack<Card> m_holder;
+
+	//help with displaying the 'ghost' cards being moved
+	LinkedList<Card> m_ghost;
 
 	//board counters
 	int m_f_count; //freecell array count

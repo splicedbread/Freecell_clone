@@ -104,6 +104,8 @@ void Freecell::StartGame()
 
 	while (m_Running && m_window.GetWindow().isOpen())
 	{
+		//also need to handle window events in here.
+
 		//main loop
 		//update the window first (this loop will happen really fast each time)
 		WindowUpdate();
@@ -112,9 +114,17 @@ void Freecell::StartGame()
 		m_input_result = UserInput();
 
 		//user validation on a move
-		m_check_result = MovementCheck();
+		if (m_input_result == 0)
+		{
+			m_check_result = MovementCheck();
+		}
 
-
+		//if there was a movement that was valid, then move
+		//those items.
+		if (m_check_result == 1)
+		{
+			MoveTo(m_numCards, m_new_col);
+		}
 	}
 }
 
@@ -162,7 +172,22 @@ void Freecell::ChooseSize(Freecell::WindowSize size)
 */
 void Freecell::WindowUpdate()
 {
+	//Draw the freecells and homecells first (doesnt matter the order here)
+	DrawFree();
+	DrawHome();
 
+	//Draw al the columns
+	DrawColumns();
+
+	//ghost cards are the last thing drawn to the buffer
+	//because they 'sit' on top of everything else
+	if (m_m1_pressed)
+	{
+		DrawGhost();
+	}
+	
+	//after everything is drawn, update the screen
+	m_window.Update();
 }
 
 /*
@@ -191,6 +216,8 @@ int Freecell::UserInput()
 */
 int Freecell::MovementCheck()
 {
+
+
 	return 0;
 }
 
