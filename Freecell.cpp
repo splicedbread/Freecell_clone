@@ -172,22 +172,25 @@ void Freecell::ChooseSize(Freecell::WindowSize size)
 */
 void Freecell::WindowUpdate()
 {
-	//Draw the freecells and homecells first (doesnt matter the order here)
-	DrawFree();
-	DrawHome();
-
-	//Draw al the columns
-	DrawColumns();
-
-	//ghost cards are the last thing drawn to the buffer
-	//because they 'sit' on top of everything else
-	if (m_m1_pressed)
+	if (m_window.GetWindow().isOpen())
 	{
-		DrawGhost();
+		//Draw the freecells and homecells first (doesnt matter the order here)
+		DrawFree();
+		DrawHome();
+
+		//Draw al the columns
+		DrawColumns();
+
+		//ghost cards are the last thing drawn to the buffer
+		//because they 'sit' on top of everything else
+		if (m_m1_pressed)
+		{
+			DrawGhost();
+		}
+
+		//after everything is drawn, update the screen
+		m_window.Update();
 	}
-	
-	//after everything is drawn, update the screen
-	m_window.Update();
 }
 
 /*
@@ -201,8 +204,52 @@ void Freecell::WindowUpdate()
 */
 int Freecell::UserInput()
 {
+	int cond = -1;
 
-	return 0;
+	//check to see if the window is open
+	if (m_window.GetWindow().isOpen())
+	{
+		//check for window events that may have been triggered.
+		Event ev;
+		while (m_window.GetWindow().pollEvent(ev))
+		{
+			//while some event occurs (such as clicking 'X')
+			switch (ev.type)
+			{
+			case Event::Closed: //window was closed
+				m_window.GetWindow().close();
+				m_Running = false;
+				break;
+
+			case Event::LostFocus: //window lost focus
+				//while loop waiting for the window
+				//to regain focus
+				while (!m_window.GetWindow().hasFocus());
+				break;
+
+			case Event::MouseMoved: //mouse moved in the wind
+				//if the mouse moved and the left mouse button 
+				//is pressed, update the mouse coordinates.
+				if (m_m1_pressed)
+				{
+					m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x;
+					m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y;
+				}
+				break;
+			}
+		}
+
+		//after the window events have happend, now 
+		//we can track mouse button presses and ESC
+
+
+	}
+	else
+	{
+		m_Running = false;
+	}
+
+	return cond;
 }
 
 /*
