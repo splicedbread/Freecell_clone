@@ -194,14 +194,14 @@ int Freecell::MovementCheck()
 	return 0;
 }
 
-/*
+/*//////////////////////////////////////////////////
 	Check Win Cond
 		checks if both the freecells and the board
 		are empty. When that is the case 
 		the game has been won. 
 
 		Maybe do something special.
-*/
+*///////////////////////////////////////////////////
 bool Freecell::CheckWinCond()
 {
 	bool cond = true;
@@ -239,13 +239,30 @@ void Freecell::MoveTo(int numOfCards, int column)
 
 }
 
-/*
+/*////////////////////////////////////////////////
 	LoadDeck
 		Loads the current deck into
 		the game board, starting with left column
 		and then then inserts left to right
-*/
+*//////////////////////////////////////////////////
 void Freecell::LoadDeck()
 {
+	int dealNum = 52;
+	int drawn = 0;
 
+	//if cheating, we only deal half the deck
+	if (m_cheat_mode)
+	{
+		dealNum = 26;
+	}
+
+	//while loop that pushes cards into the board
+	//with each top of columns first
+	while (drawn < dealNum)
+	{
+		for (int i = 0; drawn < dealNum && i < m_columns.GetLength(); i++, drawn++)
+		{
+			m_columns[i].Push(m_deck.Draw());
+		}
+	}
 }
