@@ -9,7 +9,7 @@
 #define CHEATING_CHEAT_VAL 1998
 
 //default ctor
-Freecell::Freecell() : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES)
+Freecell::Freecell() : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES), m_f_count(0)
 {
 	//setup the homecells and freecells
 	m_freecells.SetLength(4);
@@ -23,7 +23,7 @@ Freecell::Freecell() : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_X
 }
 
 //cheating ctor
-Freecell::Freecell(int specialnum) : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES)
+Freecell::Freecell(int specialnum) : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES), m_f_count(0)
 {
 	if (specialnum == CHEATING_CHEAT_VAL)
 	{
@@ -47,7 +47,7 @@ Freecell::Freecell(int specialnum) : m_Running(false), m_cheat_mode(false), m_sc
 	WOULD YOU WANT A COPY OF THE GAME TO RUN
 	AT THE SAME TIME?
 */
-Freecell::Freecell(const Freecell & cpy) : m_Running(false), m_cheat_mode(cpy.m_cheat_mode), m_scale(cpy.m_scale)
+Freecell::Freecell(const Freecell & cpy) : m_Running(false), m_cheat_mode(cpy.m_cheat_mode), m_scale(cpy.m_scale), m_f_count(cpy.m_f_count)
 {
 	m_window = cpy.m_window;
 	m_deck = cpy.m_deck;
@@ -63,6 +63,7 @@ Freecell::~Freecell()
 	m_Running = false;
 	m_cheat_mode = false;
 	m_scale = 1.0f;
+	m_f_count = 0;
 }
 
 /*/////////////////////////////////////////////////////////////
@@ -150,4 +151,82 @@ void Freecell::ChooseSize(Freecell::WindowSize size)
 	m_window.SetDimension(m_Xres, m_Yres);
 	m_window.Update();
 	StartGame();
+}
+
+/*
+	WindowUpdate
+		Updates the windows with the correct
+		graphics currently in the buffer
+*/
+void Freecell::WindowUpdate()
+{
+
+}
+
+/*
+	UserInput
+		gathers data about where the users
+		mouse is, has on Click listeners
+		etc
+
+		returns 1 for a click a 0 for a release
+		-1 if something else
+*/
+int Freecell::UserInput()
+{
+
+	return 0;
+}
+
+/*
+	MovementCheck
+		checks to make sure a given movement
+		is valid (based on how many cards can be
+		moved at a specific time)
+
+		returns 1 if valid 0 if not
+		-1 if unspecified or nothing moved
+*/
+int Freecell::MovementCheck()
+{
+	return 0;
+}
+
+/*
+	Check Win Cond
+		checks if both the freecells and the board
+		are empty. When that is the case 
+		the game has been won. 
+
+		Maybe do something special.
+*/
+bool Freecell::CheckWinCond()
+{
+	bool cond = false;
+
+	
+
+	return cond;
+}
+
+/*
+	MoveTo
+		after a valid movement check,
+		move the amount of cards
+		requested to the new location
+*/
+void Freecell::MoveTo(int numOfCards, int column)
+{
+
+}
+
+/*
+	LoadDeck
+		Loads the current deck into
+		the game board, starting with left column
+		and then then inserts left to right
+*/
+void Freecell::LoadDeck()
+{
+
 }

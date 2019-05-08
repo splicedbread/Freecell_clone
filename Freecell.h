@@ -76,5 +76,8 @@ private:
 	Array<Stack<Card>> m_homecells;
 	Array<LStack<Card>> m_columns;
 	LStack<Card> m_holder;
+
+	//board counters
+	int m_f_count; //freecell array count
 };
 #endif // !FREECELL_H
