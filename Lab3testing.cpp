@@ -9,8 +9,8 @@ int main()
 
 	char source[5][50] = {"./Resources/CardBlank.png", "./Resources/Ace.png", "./Resources/Heart.png"};
 
-	int x = 1920;
-	int y = 1080;
+	int x = 1600;
+	int y = 900;
 
 	WDManager working(x, y);
 
