@@ -72,7 +72,7 @@ void Deck::Randomise()
 	for (int i = 0; i < m_deck.GetLength(); i++)
 	{
 		rngCardNum = card_distribution(gen);//generate an element from the deck
-		Swap(i, rngCardNum); //swap those elements with the current selected one
+		Swap(m_deck[i], m_deck[rngCardNum]); //swap those elements with the current selected one
 		card_distribution.reset(); // reset the rng num, just in case
 	}
 }
