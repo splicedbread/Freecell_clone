@@ -1,6 +1,6 @@
 #include "deck.h"
 //default ctor
-Deck::Deck() : m_c_cards(0)
+Deck::Deck() : m_c_cards(0), m_scale(1.0f)
 {
 	//Load the deck with the cards
 	m_deck.SetLength(52); //set the length of the array to 52
@@ -10,6 +10,14 @@ Deck::Deck() : m_c_cards(0)
 //default dtor, does nothing really
 Deck::~Deck()
 {
+	m_scale = 1.0f;
+	m_c_cards = 0;
+}
+
+//cpy ctor
+Deck::Deck(const Deck & cpy) : m_c_cards(cpy.m_c_cards), m_scale(cpy.m_scale)
+{
+	m_deck = cpy.m_deck;
 }
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -75,6 +83,21 @@ int Deck::GetSize()
 	return m_c_cards;
 }
 
+/*///////////////////////////////////////
+	Set Scale
+		sets the scale value that is used
+		so cards do not look weird when
+		the window is a different size
+*////////////////////////////////////////
+void Deck::SetScale(float scale)
+{
+	if (scale > 0.0)
+	{
+		m_scale = scale;
+	}
+}
+
+
 /*////////////////////////////////////////////////////////////////////////////
 	Load loads the dynamic array of the deck with cards, called
 	only in the deck constructor, and in Reset() 
@@ -83,6 +106,7 @@ void Deck::Load()
 {
 	//createa temporary card, due to the nature its an Ace of Spades
 	Card tempCard(Card::SPADE, Card::ACE);
+	tempCard.SetScale(m_scale);
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 13; j++)

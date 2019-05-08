@@ -21,12 +21,16 @@ public:
 	Deck();
 	~Deck();
 
+	Deck(const Deck & cpy);
+
 	Card Draw();
 	void Reset();
 	void Empty();
 	void Randomise();
 	int GetSize();
+	void SetScale(float scale);
 private:
+	float m_scale;
 	void Load();
 	int m_c_cards;
 	Array<Card> m_deck;
