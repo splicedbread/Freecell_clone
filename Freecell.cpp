@@ -11,7 +11,7 @@
 #define CHEATING_CHEAT_VAL 1998
 
 //default ctor
-Freecell::Freecell() : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES), m_f_count(0)
+Freecell::Freecell() : m_card_grabbed(false), m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES), m_f_count(0)
 {
 	//setup the homecells and freecells
 	m_freecells.SetLength(4);
@@ -28,7 +28,7 @@ Freecell::Freecell() : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_X
 }
 
 //cheating ctor
-Freecell::Freecell(int specialnum) : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES), m_f_count(0)
+Freecell::Freecell(int specialnum) : m_card_grabbed(false), m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_Xres(MIN_X_RES), m_Yres(MIN_Y_RES), m_f_count(0)
 {
 	if (specialnum == CHEATING_CHEAT_VAL)
 	{
@@ -74,11 +74,11 @@ Freecell::~Freecell()
 	m_f_count = 0;
 }
 
-/*
+/*////////////////////////////////////////////////
 	Pause
 		looks for the gain focus event then frees 
 		back to the game
-*/
+*//////////////////////////////////////////////////
 void Freecell::Pause()
 {
 	bool paused = true;
@@ -231,11 +231,11 @@ void Freecell::ChooseSize(Freecell::WindowSize size)
 	StartGame();
 }
 
-/*
+/*//////////////////////////////////////////
 	WindowUpdate
 		Updates the windows with the correct
 		graphics currently in the buffer
-*/
+*///////////////////////////////////////////
 void Freecell::WindowUpdate()
 {
 	if (m_window.GetWindow().isOpen())
@@ -259,7 +259,7 @@ void Freecell::WindowUpdate()
 			{
 				//purge the ghost if a release has occured
 				//and cards were in ghost
-				m_ghost.Purge();
+				DropCard();
 			}
 		}
 
@@ -315,19 +315,49 @@ int Freecell::UserInput()
 }
 
 /*
+	Grab Card
+		attempts to resolve the coordinates at the mouse
+		and place that associated card and any below it
+		into ghost.
+*/
+void Freecell::GrabCard()
+{
+
+}
+
+/*
+	Drop Card
+		attempts to drop a card (or cards)
+		into a spot 
+		if applicable
+
+		if not valid, the ghost cards
+		are removed
+*/
+void Freecell::DropCard()
+{
+
+}
+
+/*//////////////////////////////////////////////
 	MovementCheck
 		checks to make sure a given movement
 		is valid (based on how many cards can be
 		moved at a specific time)
 
-		returns 1 if valid 0 if not
-		-1 if unspecified or nothing moved
-*/
+		returns the number of cards that can
+		currently be moved
+*////////////////////////////////////////////////
 int Freecell::MovementCheck()
 {
+	int cond = -1;
+	// movement is determined by the 
+	//# of available freecells + 1 + #of available colums * # of freecells
+	//however, lets instead choose the number of open free cells
+	//plus 1 for each empty column
+	cond = (4 - m_f_count) + (m_empty_cols);
 
-
-	return 0;
+	return cond;
 }
 
 /*//////////////////////////////////////////////////
@@ -442,7 +472,7 @@ void Freecell::DrawGhost()
 	std::cout << "Mouse Coords: " << m_Mouse_x << ',' << m_Mouse_y << std::endl;
 }
 
-/*
+/*//////////////////////////////////////////////////////////////////////
 	Draw Free
 
 		the freecell portion of the board
@@ -452,14 +482,14 @@ void Freecell::DrawGhost()
 
 		The freecells start at approx ~20 px from the top left and top
 		of the screen (also in account with scaling)
-*/
+*////////////////////////////////////////////////////////////////////////
 void Freecell::DrawFree()
 {
 	//first draw the blank square objects
 	int section = 0;
-	GroupObj blanks;
-	blanks.SetName("blanks");
-	blanks.SetPos(20 * m_scale, 20 * m_scale); //sets the group position here
+	m_blanks.SetName("blanks");
+	m_blanks.SetPos(20 * m_scale, 20 * m_scale); //sets the group position here
+	m_blanks.ResetGroup();
 
 	//non Static obj for the actual things that belong to the group
 	DrawableObj eblanc;
@@ -470,27 +500,34 @@ void Freecell::DrawFree()
 	eblanc.SetName("1");
 	eblanc.SetPos(0, 0);
 	//insert it into the group
-	blanks.Insert(eblanc);
+	m_blanks.Insert(eblanc);
 	section++;
 
 	//repeat for the next ones
 	eblanc.SetName("2");
 	eblanc.SetPos(section * m_offset * m_scale, 0);
-	blanks.Insert(eblanc);
+	m_blanks.Insert(eblanc);
 	section++;
 
 	eblanc.SetName("3");
 	eblanc.SetPos(section * m_offset * m_scale, 0);
-	blanks.Insert(eblanc);
+	m_blanks.Insert(eblanc);
 	section++;
 
 	eblanc.SetName("4");
 	eblanc.SetPos(section * m_offset * m_scale, 0);
-	blanks.Insert(eblanc);
+	m_blanks.Insert(eblanc);
+	section+=2;
+
+	//special symbol
+	eblanc.SetName("sym");
+	eblanc.SetSrc(RES_SYMBOL);
+	eblanc.SetPos(section * m_offset * m_scale - 10 * m_scale, 0);
+	m_blanks.Insert(eblanc);
 	section = 0;
 
 	//after the blanks are in their group, draw them to the screen buffer
-	m_window.DrawObj(blanks);
+	m_window.DrawObj(m_blanks);
 
 	//now draw any cards that may be in the freecell
 	if (m_f_count > 0)
@@ -515,9 +552,10 @@ void Freecell::DrawHome()
 	//first draw the blank square objects
 	int section = 0;
 	int horizontalGap = 8;
-	GroupObj blanks;
-	blanks.SetName("blanks");
-	blanks.SetPos(5 * m_scale + horizontalGap * m_offset * m_scale, 20 * m_scale); //sets the group position here
+	m_homebl.SetName("blanks");
+	m_homebl.SetPos(5 * m_scale + horizontalGap * m_offset * m_scale, 20 * m_scale); //sets the group position here
+
+	m_homebl.ResetGroup();
 
 	//non Static obj for the actual things that belong to the group
 	DrawableObj eblanc;
@@ -528,44 +566,41 @@ void Freecell::DrawHome()
 	eblanc.SetName("1");
 	eblanc.SetPos(0, 0);
 	//insert it into the group
-	blanks.Insert(eblanc);
+	m_homebl.Insert(eblanc);
 	section++;
 
 	//repeat for the next ones
 	eblanc.SetName("2");
 	eblanc.SetPos(section * m_offset * m_scale, 0);
-	blanks.Insert(eblanc);
+	m_homebl.Insert(eblanc);
 	section++;
 
 	eblanc.SetName("3");
 	eblanc.SetPos(section * m_offset * m_scale, 0);
-	blanks.Insert(eblanc);
+	m_homebl.Insert(eblanc);
 	section++;
 
 	eblanc.SetName("4");
 	eblanc.SetPos(section * m_offset * m_scale, 0);
-	blanks.Insert(eblanc);
+	m_homebl.Insert(eblanc);
 	section = 0;
 
 	//after the blanks are in their group, draw them to the screen buffer
-	m_window.DrawObj(blanks);
+	m_window.DrawObj(m_homebl);
 
-	//now draw any cards that may be in the freecell
-	if (m_f_count > 0)
+	//now draw any cards that may be in the homecell
+	for (int i = 0; i < m_homecells.GetLength(); i++)
 	{
-		for (int i = 0; i < m_homecells.GetLength(); i++)
+		if (!m_homecells[i].IsEmpty())
 		{
-			if (!m_homecells[i].IsEmpty())
-			{
-				GroupObj temp(m_homecells[i].Peek().GetCard(true));
-				temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
-				m_window.DrawObj(temp);
-			}
+			GroupObj temp(m_homecells[i].Peek().GetCard(true));
+			temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
+			m_window.DrawObj(temp);
 		}
 	}
 }
 
-/*
+/*/////////////////////////////////////////////////////
 	Draw Columns
 
 		A little more difficult
@@ -573,7 +608,7 @@ void Freecell::DrawHome()
 		then pop everything back into the column,
 		but while doing that draw the cards in their
 		repsective locations.
-*/
+*//////////////////////////////////////////////////////
 void Freecell::DrawColumns()
 {
 	int col_x = 20;
@@ -597,11 +632,13 @@ void Freecell::DrawColumns()
 	//insert it into the group
 	blanks.Insert(eblanc);
 
+	m_empty_cols = 0;
 
 	//have to process each column
 	for (int i = 0; i < m_columns.GetLength(); i++)
 	{
 		num_card = 0; //set the num of cards to zero
+		m_col_counts[i] = 0;
 		if (m_columns[i].IsEmpty())
 		{
 			//if the column is empty, then draw a 
@@ -609,6 +646,7 @@ void Freecell::DrawColumns()
 			blanks.SetPos(col_x * m_scale + i * m_offset * m_scale, 
 							col_y * m_scale + num_card * 20 * m_scale);
 			m_window.DrawObj(blanks); //draw the blank
+			m_empty_cols++; //increment how many empty columns there are
 		}
 		else
 		{
@@ -616,6 +654,7 @@ void Freecell::DrawColumns()
 			while (!m_columns[i].IsEmpty())
 			{
 				m_holder.Push(m_columns[i].Pop());
+				m_col_counts[i]++;
 			}
 
 			//push them all back

@@ -49,6 +49,12 @@ private:
 	//pausing game functions
 	void Pause();
 
+
+	//hidden grabbing / dropping function
+	void GrabCard();
+	void DropCard();
+
+
 	//constants used for displaying
 	const int m_offset = 70;
 	const int m_padding = 2;
@@ -78,6 +84,11 @@ private:
 	//window
 	WDManager m_window;
 
+	//objs
+	GroupObj m_blanks;
+	GroupObj m_homebl;
+
+
 	//flags
 	bool m_Running;
 	bool m_cheat_mode;
@@ -101,9 +112,11 @@ private:
 
 	//help with displaying the 'ghost' cards being moved
 	LinkedList<Card> m_ghost;
+	int m_ghost_count;
 
 	//board counters
 	int m_f_count; //freecell array count
 	int m_col_counts[8];
+	int m_empty_cols;
 };
 #endif // !FREECELL_H
