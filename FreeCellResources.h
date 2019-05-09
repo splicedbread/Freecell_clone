@@ -6,6 +6,7 @@
 	Purpose: A centralized resource management file
 *////////////////////////////////////////////////////
 
+#define RES_SYMBOL "./Resources/Symbol.png"
 #define RES_CARD "./Resources/CardBlank.png"
 #define RES_CARD_S "./Resources/CardSmall.png"
 #define RES_CARD_E "./Resources/CardEmpty.png"
