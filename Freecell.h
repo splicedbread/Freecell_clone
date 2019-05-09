@@ -45,6 +45,15 @@ public:
 	void DrawColumns();
 
 private:
+
+	//pausing game functions
+	void Pause();
+
+	//constants used for displaying
+	const int m_offset = 70;
+	const int m_padding = 2;
+
+
 	//game loop initiator
 	void StartGame(); //private so you are forced to choose a window size first
 
@@ -73,6 +82,7 @@ private:
 	bool m_Running;
 	bool m_cheat_mode;
 	bool m_m1_pressed;
+	bool m_card_grabbed;
 
 	int m_input_result;
 	int m_check_result;
@@ -94,5 +104,6 @@ private:
 
 	//board counters
 	int m_f_count; //freecell array count
+	int m_col_counts[8];
 };
 #endif // !FREECELL_H

@@ -5,6 +5,8 @@
 	Purpose: Implementation of the Freecell game class
 *//////////////////////////////////////////////////////
 #include "Freecell.h"
+#include "FreeCellResources.h"
+#include <iostream>
 
 #define CHEATING_CHEAT_VAL 1998
 
@@ -14,12 +16,15 @@ Freecell::Freecell() : m_Running(false), m_cheat_mode(false), m_scale(1.0f), m_X
 	//setup the homecells and freecells
 	m_freecells.SetLength(4);
 	m_homecells.SetLength(4);
+	m_columns.SetLength(8);
 
 	//set the size for each stack in the array to 13
 	for (int i = 0; i < m_homecells.GetLength(); i++)
 	{
 		m_homecells[i].SetSize(13);
 	}
+
+	m_window.SetTitle("Freecell 2: The search for more money");
 }
 
 //cheating ctor
@@ -33,12 +38,15 @@ Freecell::Freecell(int specialnum) : m_Running(false), m_cheat_mode(false), m_sc
 	//setup the homecells and freecells
 	m_freecells.SetLength(4);
 	m_homecells.SetLength(4);
+	m_columns.SetLength(8);
 
 	//set the size for each stack in the array to 13
 	for (int i = 0; i < m_homecells.GetLength(); i++)
 	{
 		m_homecells[i].SetSize(13);
 	}
+
+	m_window.SetTitle("Freecell 2: The search for more money");
 }
 
 //copy ctor
@@ -66,6 +74,33 @@ Freecell::~Freecell()
 	m_f_count = 0;
 }
 
+/*
+	Pause
+		looks for the gain focus event then frees 
+		back to the game
+*/
+void Freecell::Pause()
+{
+	bool paused = true;
+
+	while (paused && m_window.GetWindow().isOpen())
+	{
+		Event ev;
+		while (m_window.GetWindow().pollEvent(ev))
+		{
+			if (ev.type == Event::GainedFocus)
+			{
+				paused = false;
+			}
+
+			if (ev.type == Event::Closed)
+			{
+				m_window.GetWindow().close();
+			}
+		}
+	}
+}
+
 /*/////////////////////////////////////////////////////////////
 	StartGame
 		private method because we want the user to choose 
@@ -87,14 +122,12 @@ void Freecell::StartGame()
 
 	//if cheat mode is enabled, dont randomise the
 	//deck, because LoadDeck() does something special
-	if (m_cheat_mode)
-	{
-		m_deck.Reset();
-	}
-	else
+	m_deck.Reset();
+	if (!m_cheat_mode)
 	{
 		m_deck.Randomise();
 	}
+
 
 	//Load the Deck into the board
 	LoadDeck();
@@ -104,14 +137,44 @@ void Freecell::StartGame()
 
 	while (m_Running && m_window.GetWindow().isOpen())
 	{
+		//check for window events that may have been triggered.
+		Event ev;
+		while (m_window.GetWindow().pollEvent(ev))
+		{
+			//while some event occurs (such as clicking 'X')
+			switch (ev.type)
+			{
+			case Event::Closed: //window was closed
+				m_window.GetWindow().close();
+				m_Running = false;
+				break;
+
+			case Event::LostFocus: //window lost focus
+				//while loop waiting for the window
+				//to regain focus
+				Pause();
+				break;
+
+			case Event::MouseMoved: //mouse moved in the wind
+				//if the mouse moved and the left mouse button 
+				//is pressed, update the mouse coordinates.
+				if (m_m1_pressed)
+				{
+					m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x;
+					m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y;
+				}
+				break;
+			}
+		}
 		//also need to handle window events in here.
 
 		//main loop
-		//update the window first (this loop will happen really fast each time)
-		WindowUpdate();
 
 		//user input (get mouse coords / mouse clicks)
 		m_input_result = UserInput();
+
+		//update the window
+		WindowUpdate();
 
 		//user validation on a move
 		if (m_input_result == 0)
@@ -126,6 +189,7 @@ void Freecell::StartGame()
 			MoveTo(m_numCards, m_new_col);
 		}
 	}
+	m_window.GetWindow().close();
 }
 
 /*///////////////////////////////////////////////////////////
@@ -160,6 +224,8 @@ void Freecell::ChooseSize(Freecell::WindowSize size)
 
 	//get the scale that we will be using to display our cards
 	m_scale = (static_cast<float>(m_Xres) / static_cast<float>(MIN_X_RES));
+	m_deck.SetScale(m_scale / 8 + m_scale);
+	m_deck.Reset();
 	m_window.SetDimension(m_Xres, m_Yres);
 	m_window.Update();
 	StartGame();
@@ -187,21 +253,30 @@ void Freecell::WindowUpdate()
 		{
 			DrawGhost();
 		}
+		else
+		{
+			if (!m_ghost.IsEmpty())
+			{
+				//purge the ghost if a release has occured
+				//and cards were in ghost
+				m_ghost.Purge();
+			}
+		}
 
 		//after everything is drawn, update the screen
 		m_window.Update();
 	}
 }
 
-/*
+/*///////////////////////////////////////////////////////////
 	UserInput
 		gathers data about where the users
 		mouse is, has on Click listeners
 		etc
 
-		returns 1 for a click a 0 for a release
+		returns 1 for a mouse buton press and 0 for a release
 		-1 if something else
-*/
+*/////////////////////////////////////////////////////////////
 int Freecell::UserInput()
 {
 	int cond = -1;
@@ -209,39 +284,26 @@ int Freecell::UserInput()
 	//check to see if the window is open
 	if (m_window.GetWindow().isOpen())
 	{
-		//check for window events that may have been triggered.
-		Event ev;
-		while (m_window.GetWindow().pollEvent(ev))
-		{
-			//while some event occurs (such as clicking 'X')
-			switch (ev.type)
-			{
-			case Event::Closed: //window was closed
-				m_window.GetWindow().close();
-				m_Running = false;
-				break;
-
-			case Event::LostFocus: //window lost focus
-				//while loop waiting for the window
-				//to regain focus
-				while (!m_window.GetWindow().hasFocus());
-				break;
-
-			case Event::MouseMoved: //mouse moved in the wind
-				//if the mouse moved and the left mouse button 
-				//is pressed, update the mouse coordinates.
-				if (m_m1_pressed)
-				{
-					m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x;
-					m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y;
-				}
-				break;
-			}
-		}
-
 		//after the window events have happend, now 
 		//we can track mouse button presses and ESC
+		if (Mouse::isButtonPressed(Mouse::Left))
+		{
+			m_m1_pressed = true;
+			m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x;
+			m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y;
+			cond = 1;
+		}
+		else
+		{
+			m_m1_pressed = false;
+			cond = 0;
+		}
 
+		//check for esc key being pressed
+		if (Keyboard::isKeyPressed(Keyboard::Escape))
+		{
+			m_Running = false;
+		}
 
 	}
 	else
@@ -324,6 +386,12 @@ void Freecell::LoadDeck()
 	int dealNum = 52;
 	int drawn = 0;
 
+	//make sure the current col counts are reset
+	for (int i = 0; i < 8; i++)
+	{
+		m_col_counts[i] = 0;
+	}
+
 	//if cheating, we only deal half the deck
 	if (m_cheat_mode)
 	{
@@ -337,6 +405,230 @@ void Freecell::LoadDeck()
 		for (int i = 0; drawn < dealNum && i < m_columns.GetLength(); i++, drawn++)
 		{
 			m_columns[i].Push(m_deck.Draw());
+			m_col_counts[i]++;
+		}
+	}
+}
+
+/*
+	Draw functions down past this point
+
+	I found it easier to break down each
+	draw function into each section of the board
+	so that the original function for drawing the 
+	screen would not take up 2 pages of Visual Studio
+*/
+
+/*//////////////////////////////////////////////////////////////
+	Draw ghost
+
+		This one is special.
+		when it starts it looks at the coordinates that the
+		mouse was at when a left click occured
+		
+		if that click is in a valid location for a card
+		then that card and the ones below it are loaded
+		into m_ghost
+		those objects are then cloned and 'attatched' to
+		the mouse until the mouse releases the button.
+
+		on release the ghost should disappear
+		(and if the movement was valid, 
+			then the cards are moved to their new location)
+*////////////////////////////////////////////////////////////////
+void Freecell::DrawGhost()
+{
+	//temporarily cout
+	std::cout << "Mouse Coords: " << m_Mouse_x << ',' << m_Mouse_y << std::endl;
+}
+
+/*
+	Draw Free
+
+		the freecell portion of the board
+		draws in the placemarkers for empty cells
+		then any cards that belong in there need to use a smaller 
+		card blank.
+
+		The freecells start at approx ~20 px from the top left and top
+		of the screen (also in account with scaling)
+*/
+void Freecell::DrawFree()
+{
+	//first draw the blank square objects
+	int section = 0;
+	GroupObj blanks;
+	blanks.SetName("blanks");
+	blanks.SetPos(20 * m_scale, 20 * m_scale); //sets the group position here
+
+	//non Static obj for the actual things that belong to the group
+	DrawableObj eblanc;
+	eblanc.SetSrc(RES_CARD_E);
+	eblanc.SetScale(m_scale);
+
+	//set the position and name of the first empty one
+	eblanc.SetName("1");
+	eblanc.SetPos(0, 0);
+	//insert it into the group
+	blanks.Insert(eblanc);
+	section++;
+
+	//repeat for the next ones
+	eblanc.SetName("2");
+	eblanc.SetPos(section * m_offset * m_scale, 0);
+	blanks.Insert(eblanc);
+	section++;
+
+	eblanc.SetName("3");
+	eblanc.SetPos(section * m_offset * m_scale, 0);
+	blanks.Insert(eblanc);
+	section++;
+
+	eblanc.SetName("4");
+	eblanc.SetPos(section * m_offset * m_scale, 0);
+	blanks.Insert(eblanc);
+	section = 0;
+
+	//after the blanks are in their group, draw them to the screen buffer
+	m_window.DrawObj(blanks);
+
+	//now draw any cards that may be in the freecell
+	if (m_f_count > 0)
+	{
+		for (int i = 0; i < m_f_count && i < m_freecells.GetLength(); i++)
+		{
+			
+			GroupObj temp(m_freecells[i].GetCard(true));
+			temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
+			m_window.DrawObj(temp);
+		}
+	}
+}
+
+/*/////////////////////////////////////////////////////////////////////
+	Draw Home
+		Similar to Feecells
+		however only need draw the top object of each respective stack
+*//////////////////////////////////////////////////////////////////////
+void Freecell::DrawHome()
+{
+	//first draw the blank square objects
+	int section = 0;
+	int horizontalGap = 8;
+	GroupObj blanks;
+	blanks.SetName("blanks");
+	blanks.SetPos(5 * m_scale + horizontalGap * m_offset * m_scale, 20 * m_scale); //sets the group position here
+
+	//non Static obj for the actual things that belong to the group
+	DrawableObj eblanc;
+	eblanc.SetSrc(RES_CARD_E);
+	eblanc.SetScale(m_scale);
+
+	//set the position and name of the first empty one
+	eblanc.SetName("1");
+	eblanc.SetPos(0, 0);
+	//insert it into the group
+	blanks.Insert(eblanc);
+	section++;
+
+	//repeat for the next ones
+	eblanc.SetName("2");
+	eblanc.SetPos(section * m_offset * m_scale, 0);
+	blanks.Insert(eblanc);
+	section++;
+
+	eblanc.SetName("3");
+	eblanc.SetPos(section * m_offset * m_scale, 0);
+	blanks.Insert(eblanc);
+	section++;
+
+	eblanc.SetName("4");
+	eblanc.SetPos(section * m_offset * m_scale, 0);
+	blanks.Insert(eblanc);
+	section = 0;
+
+	//after the blanks are in their group, draw them to the screen buffer
+	m_window.DrawObj(blanks);
+
+	//now draw any cards that may be in the freecell
+	if (m_f_count > 0)
+	{
+		for (int i = 0; i < m_homecells.GetLength(); i++)
+		{
+			if (!m_homecells[i].IsEmpty())
+			{
+				GroupObj temp(m_homecells[i].Peek().GetCard(true));
+				temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
+				m_window.DrawObj(temp);
+			}
+		}
+	}
+}
+
+/*
+	Draw Columns
+
+		A little more difficult
+		Pop everything from a column into a temp stack,
+		then pop everything back into the column,
+		but while doing that draw the cards in their
+		repsective locations.
+*/
+void Freecell::DrawColumns()
+{
+	int col_x = 20;
+	int col_y = 95;
+	int card_space = 30;
+	int num_card = 0;
+
+
+	//have a blank obj n standby
+	GroupObj blanks;
+	blanks.SetName("blanks");
+
+	//non Static obj for the actual things that belong to the group
+	DrawableObj eblanc;
+	eblanc.SetSrc(RES_CARD_E);
+	eblanc.SetScale(m_scale);
+
+	//set the position and name of the first empty one
+	eblanc.SetName("1");
+	eblanc.SetPos(0, 0);
+	//insert it into the group
+	blanks.Insert(eblanc);
+
+
+	//have to process each column
+	for (int i = 0; i < m_columns.GetLength(); i++)
+	{
+		num_card = 0; //set the num of cards to zero
+		if (m_columns[i].IsEmpty())
+		{
+			//if the column is empty, then draw a 
+			//blank square in its place
+			blanks.SetPos(col_x * m_scale + i * m_offset * m_scale, 
+							col_y * m_scale + num_card * 20 * m_scale);
+			m_window.DrawObj(blanks); //draw the blank
+		}
+		else
+		{
+			//pop all items in col[i] into m_holder
+			while (!m_columns[i].IsEmpty())
+			{
+				m_holder.Push(m_columns[i].Pop());
+			}
+
+			//push them all back
+			while (!m_holder.IsEmpty())
+			{
+				m_columns[i].Push(m_holder.Pop());
+				GroupObj temp;
+				temp = m_columns[i].Peek().GetCard(false); //get the drawable objgroup from the card
+				temp.SetPos(col_x * m_scale + i * m_offset * m_scale,
+							col_y * m_scale + num_card * card_space * m_scale);
+				num_card++; //increment after so the next cards displayed are offeset vertically
+				m_window.DrawObj(temp); //draw the obj
+			}
 		}
 	}
 }
