@@ -160,8 +160,8 @@ void Freecell::StartGame()
 				//is pressed, update the mouse coordinates.
 				if (m_m1_pressed)
 				{
-					m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x;
-					m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y;
+					m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x / m_scale;
+					m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y / m_scale;
 				}
 				break;
 			}
@@ -289,8 +289,8 @@ int Freecell::UserInput()
 		if (Mouse::isButtonPressed(Mouse::Left))
 		{
 			m_m1_pressed = true;
-			m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x;
-			m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y;
+			m_Mouse_x = Mouse::getPosition(m_window.GetWindow()).x / m_scale;
+			m_Mouse_y = Mouse::getPosition(m_window.GetWindow()).y / m_scale;
 			cond = 1;
 		}
 		else
@@ -315,6 +315,36 @@ int Freecell::UserInput()
 }
 
 /*
+	Get Region
+		A tool for getting the general region the mouse is in
+*/
+Freecell::ElmRegion Freecell::GetRegion()
+{
+	ElmRegion reg = NONE;
+	//freecells
+	if (m_Mouse_x >= 20 && m_Mouse_x < m_offset * 4 && m_Mouse_y >= 20 && m_Mouse_y < 75)
+	{
+		reg = FREE;
+	}
+
+	//Homecells
+	else if (m_Mouse_x >= (5 + m_offset * 8) && m_Mouse_x < (5 + m_offset * 12)
+		&& m_Mouse_y >= 20 && m_Mouse_y < 75)
+	{
+		reg = HOME;
+	}
+
+	//Columns
+	else if (m_Mouse_x >= 20 && m_Mouse_x < 5 + m_offset * 8
+		&& m_Mouse_y >= col_y && m_Mouse_y < m_Yres)
+	{
+		reg = COLUMN;
+	}
+
+	return reg;
+}
+
+/*
 	Grab Card
 		attempts to resolve the coordinates at the mouse
 		and place that associated card and any below it
@@ -322,7 +352,51 @@ int Freecell::UserInput()
 */
 void Freecell::GrabCard()
 {
+	if (m_m1_pressed && !m_card_grabbed)
+	{
+		//if m1 is pressed and cards are already not grabbed
 
+		//determine which 'area' we are trying to access.
+		switch (GetRegion())
+		{
+		case FREE: //freecell region
+			//check if there is any cards in freecell first
+			if (m_f_count != 0)
+			{
+				//by dividing by the offset, we can determine the array
+				//positioning
+				int cell_num = (m_Mouse_x / m_offset);
+				if (cell_num = 4)
+				{
+					cell_num = 3;
+				}
+
+				//check to see if there is cards there
+				if (cell_num <= m_f_count - 1)
+				{
+					//load a copy of the card into ghost
+				}
+			}
+			break; //end freecell case
+
+		case HOME: //home cell region
+			//will not allow players to grab from the home region
+			break;
+
+		case COLUMN: //column region
+			break;
+
+		default:
+			break;
+		}
+		
+
+
+	}
+	else if (!m_m1_pressed && m_card_grabbed)
+	{
+		DropCard();
+	}
 }
 
 /*
@@ -611,9 +685,6 @@ void Freecell::DrawHome()
 *//////////////////////////////////////////////////////
 void Freecell::DrawColumns()
 {
-	int col_x = 20;
-	int col_y = 95;
-	int card_space = 30;
 	int num_card = 0;
 
 

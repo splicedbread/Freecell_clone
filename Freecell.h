@@ -23,6 +23,10 @@ public:
 		SMALL, MEDIUM, LARGE
 	};
 
+	enum ElmRegion
+	{
+		NONE, FREE, HOME, COLUMN
+	};
 
 	Freecell();
 	Freecell(int specialnum); //used for cheats
@@ -54,10 +58,16 @@ private:
 	void GrabCard();
 	void DropCard();
 
+	ElmRegion GetRegion();
+
 
 	//constants used for displaying
 	const int m_offset = 70;
 	const int m_padding = 2;
+
+	const int col_x = 20;
+	const int col_y = 95;
+	const int card_space = 30;
 
 
 	//game loop initiator
