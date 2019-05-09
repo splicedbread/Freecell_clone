@@ -278,7 +278,7 @@ bool LinkedList<T>::Extract(T out)
 
 	Node<T> * travel = m_head;
 
-	while (travel != nullptr && travel->m_data != out)
+	while (travel != nullptr && !(travel->m_data == out))
 	{
 		travel = travel->m_next;
 	}

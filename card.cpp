@@ -28,6 +28,12 @@ bool Card::operator==(const Card & right)
 	return ((this->m_face == right.m_face) && (this->m_suit == right.m_suit));
 }
 
+//not equivalency
+bool Card::operator!=(const Card & right)
+{
+	return (*this == right);
+}
+
 //operator = overload 
 Card & Card::operator=(const Card & right)
 {
@@ -63,10 +69,12 @@ Card::CardType Card::GetFace() const
 	the drawable group associated for the card
 	call update to the card before this
 	to get the most current group obj
+
+	mode = true for small card
 *//////////////////////////////////////////////
-GroupObj & Card::GetCard()
+GroupObj & Card::GetCard(bool mode)
 {
-	UpdateCard();
+	UpdateCard(mode);
 	return m_card;
 }
 
@@ -104,8 +112,12 @@ void Card::SetFace(CardType face)
 		a private function
 		that serves as a way to insert details
 		about a card into a GroupObj
+
+		size makes the card have a small or large 
+		card background
+		size = true for small card
 *//////////////////////////////////////////////
-void Card::UpdateCard()
+void Card::UpdateCard(bool size)
 {
 	m_card.ResetGroup();
 
@@ -119,7 +131,14 @@ void Card::UpdateCard()
 
 	//set the res values for each of the drawables
 	//card
-	e_blank.SetSrc(RES_CARD);
+	if (!size)
+	{
+		e_blank.SetSrc(RES_CARD);
+	}
+	else
+	{
+		e_blank.SetSrc(RES_CARD_S);
+	}
 
 	//suit obj
 	switch (m_suit)

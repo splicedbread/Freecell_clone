@@ -37,7 +37,7 @@ public:
 
 	void Push(T itm);
 	T Pop();
-	const T & Peek() const;
+	T & Peek();
 	int Size() const;
 
 	bool IsEmpty() const;
@@ -142,7 +142,7 @@ T LStack<T>::Pop()
 		are on the stack
 *////////////////////////////////////////
 template <typename T>
-const T & LStack<T>::Peek() const
+T & LStack<T>::Peek()
 {
 	if (m_curr_items <= 0)
 	{

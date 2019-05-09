@@ -33,16 +33,17 @@ public:
 	~Card();
 
 	bool operator == (const Card & right);
+	bool operator != (const Card & right);
 	Card & operator = (const Card & right);
 
 	CardSuit GetSuit() const;
 	CardType GetFace() const;
-	GroupObj & GetCard();
+	GroupObj & GetCard(bool mode);
 	void SetScale(float scale);
 	void SetSuit(CardSuit suit);
 	void SetFace(CardType face);
 private:
-	void UpdateCard();
+	void UpdateCard(bool size);
 
 	float m_scale;
 	GroupObj m_card;
