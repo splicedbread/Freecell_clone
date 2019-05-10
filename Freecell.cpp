@@ -386,13 +386,13 @@ void Freecell::GrabCard()
 			break;
 
 		case COLUMN: //column region
+			//a little tricky, but there is a formula per card. 
+			//first determine which column we /could/ be looking at
 			break;
 
 		default:
 			break;
 		}
-		
-
 
 	}
 	else if (!m_m1_pressed && m_card_grabbed)
@@ -610,10 +610,25 @@ void Freecell::DrawFree()
 	{
 		for (int i = 0; i < m_f_count && i < m_freecells.GetLength(); i++)
 		{
-			
-			GroupObj temp(m_freecells[i].GetCard(true));
-			temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
-			m_window.DrawObj(temp);
+			bool isGhost = false;
+			if (!m_ghost.IsEmpty()) //if ghost is not empty
+			{
+				for (int count = 0; !isGhost && count < m_ghost_count; count++)
+				{
+					//we want to check if the current card in freecell matches any in ghost
+					if (m_freecells[i] == m_ghost.First())
+					{
+						isGhost = true;
+					}
+				}
+			}
+
+			if (!isGhost)
+			{
+				GroupObj temp(m_freecells[i].GetCard(true));
+				temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
+				m_window.DrawObj(temp);
+			}
 		}
 	}
 }
@@ -734,12 +749,33 @@ void Freecell::DrawColumns()
 			while (!m_holder.IsEmpty())
 			{
 				m_columns[i].Push(m_holder.Pop());
-				GroupObj temp;
-				temp = m_columns[i].Peek().GetCard(false); //get the drawable objgroup from the card
-				temp.SetPos(col_x * m_scale + i * m_offset * m_scale,
-							col_y * m_scale + num_card * card_space * m_scale);
-				num_card++; //increment after so the next cards displayed are offeset vertically
-				m_window.DrawObj(temp); //draw the obj
+
+				bool isGhost = false;
+				if (!m_ghost.IsEmpty()) //if ghost is not empty
+				{
+					Node<Card>* travel = m_ghost.GetHead();
+					while (!isGhost && travel != nullptr)
+					{
+						//check travels data with the top of the column
+						if (travel->GetData() == m_columns[i].Peek())
+						{
+							isGhost = true;
+						}
+						//increment travel
+						travel = travel->GetNext();
+					}
+				}
+
+				//if the obj is not listed in ghost, draw it to screen.
+				if (!isGhost)
+				{
+					GroupObj temp;
+					temp = m_columns[i].Peek().GetCard(false); //get the drawable objgroup from the card
+					temp.SetPos(col_x * m_scale + i * m_offset * m_scale,
+						col_y * m_scale + num_card * card_space * m_scale);
+					num_card++; //increment after so the next cards displayed are offeset vertically
+					m_window.DrawObj(temp); //draw the obj
+				}
 			}
 		}
 	}
