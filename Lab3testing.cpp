@@ -40,7 +40,8 @@ int main()
 
 void gameStub()
 {
-	int selection;
+	char selection[20];
+	int val = 0;
 	//ask the user for the size
 	cout << "Please Select a size (number):\n";
 	cout << "(1). Small (smallest resolution supported).\n";
@@ -51,16 +52,18 @@ void gameStub()
 	{
 		cin >> selection;
 
-		if (selection < 1 || selection > 3)
+		val = atoi(selection);
+
+		if (val < 1 || val > 3)
 		{
 			cout << "Invalid Selection. Try again.\n";
 		}
-
-	} while (selection < 1 || selection > 3);
+	
+	} while (val < 1 || val > 3);
 
 	FreeConsole(); //Comment out when needing the console for debugging
 
 	Freecell game;
-	game.ChooseSize(static_cast<Freecell::WindowSize>(selection - 1));
+	game.ChooseSize(static_cast<Freecell::WindowSize>(val - 1));
 
 }

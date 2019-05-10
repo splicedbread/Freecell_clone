@@ -797,7 +797,6 @@ void Freecell::DropCard()
 						{
 							//if the card is in freecell, assume there is only 1
 							//and move it to the open spot
-							std::cout << "going to freecell.\n";
 							m_columns[m_new_col].Push(m_freecells[card_index]);
 							m_prev_freecell = card_index;
 							MoveFreeCellsDown();
@@ -958,9 +957,60 @@ void Freecell::DropCard()
 						{
 							//if the card is in freecell, assume there is only 1
 							//and move it to the open spot
-							m_columns[m_new_col].Push(m_freecells[card_index]);
-							m_prev_freecell = card_index;
-							MoveFreeCellsDown();
+							if (!m_ghost.IsEmpty())
+							{
+								bool flag = true;
+								switch (m_freecells[card_index].GetSuit())
+								{
+								case Card::SPADE: //if its a spade, check if the next card is a club
+									if (m_columns[m_new_col].Peek().GetSuit() == Card::CLUB
+										|| m_columns[m_new_col].Peek().GetSuit() == Card::SPADE)
+									{
+										flag = false;
+									}
+									break;
+
+								case Card::CLUB: //if its a club, check if next card is a spade
+									if (m_columns[m_new_col].Peek().GetSuit() == Card::SPADE
+										|| m_columns[m_new_col].Peek().GetSuit() == Card::CLUB)
+									{
+										flag = false;
+									}
+									break;
+
+								case Card::HEART: //check for diamond
+									if (m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND
+										|| m_columns[m_new_col].Peek().GetSuit() == Card::HEART)
+									{
+										flag = false;
+									}
+									break;
+
+								case Card::DIAMOND: //check for heart
+									if (m_columns[m_new_col].Peek().GetSuit() == Card::HEART
+										|| m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND)
+									{
+										flag = false;
+									}
+									break;
+								}
+
+								//check numerical order
+								if (flag && !(static_cast<int>(m_columns[m_new_col].Peek().GetFace()) - 1 ==
+									static_cast<int>(m_freecells[card_index].GetFace())))
+								{
+									flag = false;
+								}
+
+
+								if (flag)
+								{
+									//if all the checks have been passed, then move the item here
+									m_columns[m_new_col].Push(m_freecells[card_index]);
+									m_prev_freecell = card_index;
+									MoveFreeCellsDown();
+								}
+							}
 						}
 						else
 						{
