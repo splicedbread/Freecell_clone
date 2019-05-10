@@ -392,7 +392,7 @@ bool Freecell::CheckOrder()
 			}
 
 			//check numerical order
-			if (!(static_cast<int>(flag && travel->GetData().GetFace()) - 1 == 
+			if (flag && !(static_cast<int>(travel->GetData().GetFace()) - 1 == 
 				static_cast<int>(travel->GetNext()->GetData().GetFace())))
 			{
 				flag = false;
@@ -431,9 +431,6 @@ void Freecell::GrabCard()
 				{
 					cell_num = 3;
 				}
-
-				std::cout << "x value: " << m_Mouse_x << std::endl;
-				std::cout << "cell num: " << cell_num << std::endl;
 
 				//check to see if there is cards there
 				if (cell_num < m_f_count)
@@ -705,6 +702,7 @@ void Freecell::DropCard()
 
 		case COLUMN: //columns
 
+			std::cout << "entering columns drop card.\n";
 			//we can move either 1 item or multiples
 			//a little tricky, but there is a formula per card. 
 			//first determine which column we /could/ be looking at
@@ -727,6 +725,8 @@ void Freecell::DropCard()
 				{
 					m_new_col = m_columns.GetLength() - 1;
 				}
+
+				std::cout << "old column , new column: " << m_old_col << ',' << m_new_col << std::endl;
 
 				//ensure this is a new col we want to look at
 				if (m_new_col != m_old_col);
@@ -756,7 +756,7 @@ void Freecell::DropCard()
 						{
 							//if the card is in freecell, assume there is only 1
 							//and move it to the open spot
-						
+							std::cout << "going to freecell.\n";
 							m_columns[m_new_col].Push(m_freecells[card_index]);
 							m_prev_freecell = card_index;
 							MoveFreeCellsDown();
@@ -772,6 +772,7 @@ void Freecell::DropCard()
 								1. if the amount of cards we can move is valid
 								2. moving them
 							*/
+							std::cout << "value not in freecell.\n";
 							//create a travel node from the tail
 							Node<Card>* travel = m_ghost.GetTail();
 
@@ -791,25 +792,30 @@ void Freecell::DropCard()
 									while (moved <= m_ghost_count)
 									{
 										//move as many cards as we can into freecell first
-										for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--, moved++)
+										for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--)
 										{
 											if (travel->GetData() == m_columns[m_old_col].Peek())
 											{
-												//if that is the same as the columns top push it into a freecell
-												m_freecells[i] = m_columns[m_old_col].Pop();
-												freeCount++;
-
 												//if the next itteration is the last card in ghost
 												if (moved + 1 == m_ghost_count)
 												{
+
 													//then move it from its column to the new column first
 													if (!m_columns[m_new_col].IsEmpty())
 													{
 														m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
 													}
 												}
+												else
+												{
+													//if that is the same as the columns top push it into a freecell
+													m_freecells[i] = m_columns[m_old_col].Pop();
+													freeCount++;
+												}
 											}
 
+											std::cout << "moving colum to freecell.\n";
+											moved++;
 											travel = travel->GetPrevious();
 										}
 
@@ -817,6 +823,7 @@ void Freecell::DropCard()
 										//into an empty column
 										if (moved < m_ghost_count)
 										{
+
 											track = storage;
 											for (int j = 0; !store_flag && j < m_columns.GetLength(); j++)
 											{
@@ -869,6 +876,7 @@ void Freecell::DropCard()
 													{
 														m_freecells[dex] = m_columns[i].Pop();
 														dex++;
+														std::cout << "emptying column: " << i << std::endl;
 													}
 
 													//then empty freecell back into the new column
@@ -933,36 +941,92 @@ void Freecell::DropCard()
 
 							//because we are moving *to* an empty column, we have to discount 1 space in movement
 							//also need to check if 
-							if (m_ghost_count <= allowedMovement && m_ghost_count > 0)
+							if (m_ghost_count <= allowedMovement && m_ghost_count > 1)
 							{
 								int moved = 0; //how many cards have been moved
 								int storage = 0; //how many storage spaces have we used
 								int track = 0; //how many storage spaces have we used and passed
 								bool store_flag = false; //is this a valid storage space
 								int freeCount = 0;
+								bool n_flag = true;
 
-								while (moved <= m_ghost_count)
+
+								while (moved < m_ghost_count)
 								{
 									//move as many cards as we can into freecell first
-									for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--, moved++)
+									for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--)
 									{
 										if (travel->GetData() == m_columns[m_old_col].Peek())
 										{
-											//if that is the same as the columns top push it into a freecell
-											m_freecells[i] = m_columns[m_old_col].Pop();
-											freeCount++;
-
 											//if the next itteration is the last card in ghost
 											if (moved + 1 == m_ghost_count)
 											{
 												//then move it from its column to the new column first
 												if (!m_columns[m_old_col].IsEmpty())
 												{
-													m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
+													if (!m_ghost.IsEmpty())
+													{
+
+														switch (m_columns[m_old_col].Peek().GetSuit())
+														{
+														case Card::SPADE: //if its a spade, check if the next card is a club
+															if (m_columns[m_new_col].Peek().GetSuit() == Card::CLUB
+																|| m_columns[m_new_col].Peek().GetSuit() == Card::SPADE)
+															{
+																n_flag = false;
+															}
+															break;
+
+														case Card::CLUB: //if its a club, check if next card is a spade
+															if (m_columns[m_new_col].Peek().GetSuit() == Card::SPADE
+																|| m_columns[m_new_col].Peek().GetSuit() == Card::CLUB)
+															{
+																n_flag = false;
+															}
+															break;
+
+														case Card::HEART: //check for diamond
+															if (m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND
+																|| m_columns[m_new_col].Peek().GetSuit() == Card::HEART)
+															{
+																n_flag = false;
+															}
+															break;
+
+														case Card::DIAMOND: //check for heart
+															if (m_columns[m_new_col].Peek().GetSuit() == Card::HEART
+																|| m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND)
+															{
+																n_flag = false;
+															}
+															break;
+														}
+
+														//check numerical order
+														if (n_flag && !(static_cast<int>(m_columns[m_new_col].Peek().GetFace()) - 1 ==
+															static_cast<int>(m_columns[m_old_col].Peek().GetFace())))
+														{
+															n_flag = false;
+														}
+
+
+														if (n_flag)
+														{
+															//if all the checks have been passed, then move the item here
+															m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
+														}
+													}
 												}
+											}
+											else
+											{
+												//if that is the same as the columns top push it into a freecell
+												m_freecells[i] = m_columns[m_old_col].Pop();
+												freeCount++;
 											}
 										}
 
+										moved++;
 										travel = travel->GetPrevious();
 									}
 
@@ -991,8 +1055,60 @@ void Freecell::DropCard()
 												//put everything that we can from free cell into a blank column
 												for (int i = m_f_count; i < m_freecells.GetLength(); i++)
 												{
-													m_columns[j].Push(m_freecells[i]);
-													freeCount--;
+													if (!m_ghost.IsEmpty())
+													{
+														bool flag = true;
+
+														switch (m_freecells[i].GetSuit())
+														{
+														case Card::SPADE: //if its a spade, check if the next card is a club
+															if (m_columns[j].Peek().GetSuit() == Card::CLUB
+																|| m_columns[j].Peek().GetSuit() == Card::SPADE)
+															{
+																flag = false;
+															}
+															break;
+
+														case Card::CLUB: //if its a club, check if next card is a spade
+															if (m_columns[j].Peek().GetSuit() == Card::SPADE
+																|| m_columns[j].Peek().GetSuit() == Card::CLUB)
+															{
+																flag = false;
+															}
+															break;
+
+														case Card::HEART: //check for diamond
+															if (m_columns[j].Peek().GetSuit() == Card::DIAMOND
+																|| m_columns[j].Peek().GetSuit() == Card::HEART)
+															{
+																flag = false;
+															}
+															break;
+
+														case Card::DIAMOND: //check for heart
+															if (m_columns[j].Peek().GetSuit() == Card::HEART
+																|| m_columns[j].Peek().GetSuit() == Card::DIAMOND)
+															{
+																flag = false;
+															}
+															break;
+														}
+
+														//check numerical order
+														if (flag && !(static_cast<int>(m_columns[j].Peek().GetFace()) - 1 ==
+															static_cast<int>(m_freecells[i].GetFace())))
+														{
+															flag = false;
+														}
+
+
+														if (flag)
+														{
+															//if all the checks have been passed, then move the item here
+															m_columns[j].Push(m_freecells[i]);
+															freeCount--;
+														}
+													}
 												}
 												storage++;
 											}
@@ -1004,7 +1120,63 @@ void Freecell::DropCard()
 										//then left storages are consilidated
 										for (int i = m_freecells.GetLength() - freeCount; i < m_freecells.GetLength(); i++)
 										{
-											m_columns[m_new_col].Push(m_freecells[i]);
+											if (!m_ghost.IsEmpty())
+											{
+												bool flag = true;
+
+												switch (m_freecells[i].GetSuit())
+												{
+												case Card::SPADE: //if its a spade, check if the next card is a club
+													if (m_columns[m_new_col].Peek().GetSuit() == Card::CLUB
+														|| m_columns[m_new_col].Peek().GetSuit() == Card::SPADE)
+													{
+														flag = false;
+													}
+													break;
+
+												case Card::CLUB: //if its a club, check if next card is a spade
+													if (m_columns[m_new_col].Peek().GetSuit() == Card::SPADE
+														|| m_columns[m_new_col].Peek().GetSuit() == Card::CLUB)
+													{
+														flag = false;
+													}
+													break;
+
+												case Card::HEART: //check for diamond
+													if (m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND
+														|| m_columns[m_new_col].Peek().GetSuit() == Card::HEART)
+													{
+														flag = false;
+													}
+													break;
+
+												case Card::DIAMOND: //check for heart
+													if (m_columns[m_new_col].Peek().GetSuit() == Card::HEART
+														|| m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND)
+													{
+														flag = false;
+													}
+													break;
+												}
+
+												//check numerical order
+												if (flag && !(static_cast<int>(m_columns[m_new_col].Peek().GetFace()) - 1 ==
+													static_cast<int>(m_freecells[i].GetFace())))
+												{
+													flag = false;
+												}
+
+
+												if (flag && n_flag)
+												{
+													//if all the checks have been passed, then move the item here
+													m_columns[m_new_col].Push(m_freecells[i]);
+												}
+												else if (!n_flag)
+												{
+													m_columns[m_old_col].Push(m_freecells[i]);
+												}
+											}
 										}
 										freeCount = 0;
 
@@ -1027,10 +1199,119 @@ void Freecell::DropCard()
 												//then empty freecell back into the new column
 												for (int j = m_f_count; j < m_freecells.GetLength(); j++)
 												{
-													m_columns[m_new_col].Push(m_freecells[j]);
+													bool flag = true;
+
+													switch (m_freecells[j].GetSuit())
+													{
+													case Card::SPADE: //if its a spade, check if the next card is a club
+														if (m_columns[m_new_col].Peek().GetSuit() == Card::CLUB
+															|| m_columns[m_new_col].Peek().GetSuit() == Card::SPADE)
+														{
+															flag = false;
+														}
+														break;
+
+													case Card::CLUB: //if its a club, check if next card is a spade
+														if (m_columns[m_new_col].Peek().GetSuit() == Card::SPADE
+															|| m_columns[m_new_col].Peek().GetSuit() == Card::CLUB)
+														{
+															flag = false;
+														}
+														break;
+
+													case Card::HEART: //check for diamond
+														if (m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND
+															|| m_columns[m_new_col].Peek().GetSuit() == Card::HEART)
+														{
+															flag = false;
+														}
+														break;
+
+													case Card::DIAMOND: //check for heart
+														if (m_columns[m_new_col].Peek().GetSuit() == Card::HEART
+															|| m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND)
+														{
+															flag = false;
+														}
+														break;
+													}
+
+													//check numerical order
+													if (flag && !(static_cast<int>(m_columns[m_new_col].Peek().GetFace()) - 1 ==
+														static_cast<int>(m_freecells[j].GetFace())))
+													{
+														flag = false;
+													}
+
+
+													if (flag && n_flag)
+													{
+														//if all the checks have been passed, then move the item here
+														m_columns[m_new_col].Push(m_freecells[j]);
+													}
+													else if (n_flag)
+													{
+														m_columns[m_old_col].Push(m_freecells[j]);
+													}
 												}
 											}
 										}
+									}
+								}
+							}
+							else if (m_ghost_count == 1)
+							{
+								if (!m_ghost.IsEmpty())
+								{
+									bool flag = true;
+
+									switch (m_ghost.First().GetSuit())
+									{
+									case Card::SPADE: //if its a spade, check if the next card is a club
+										if (m_columns[m_new_col].Peek().GetSuit() == Card::CLUB
+											|| m_columns[m_new_col].Peek().GetSuit() == Card::SPADE)
+										{
+											flag = false;
+										}
+										break;
+
+									case Card::CLUB: //if its a club, check if next card is a spade
+										if (m_columns[m_new_col].Peek().GetSuit() == Card::SPADE
+											|| m_columns[m_new_col].Peek().GetSuit() == Card::CLUB)
+										{
+											flag = false;
+										}
+										break;
+
+									case Card::HEART: //check for diamond
+										if (m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND
+											|| m_columns[m_new_col].Peek().GetSuit() == Card::HEART)
+										{
+											flag = false;
+										}
+										break;
+
+									case Card::DIAMOND: //check for heart
+										if (m_columns[m_new_col].Peek().GetSuit() == Card::HEART
+											|| m_columns[m_new_col].Peek().GetSuit() == Card::DIAMOND)
+										{
+											flag = false;
+										}
+										break;
+									}
+
+									//check numerical order
+									if (flag && !(static_cast<int>(m_columns[m_new_col].Peek().GetFace()) - 1 ==
+										static_cast<int>(m_columns[m_old_col].Peek().GetFace())))
+									{
+										flag = false;
+									}
+									
+
+									if (flag)
+									{
+										//if all the checks have been passed, then move the item here
+										m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
 									}
 								}
 							}
@@ -1045,7 +1326,6 @@ void Freecell::DropCard()
 	//purge m_ghost
 	m_ghost.Purge();
 	m_ghost_count = 0;
-	m_old_col = 0;
 	m_card_grabbed = false;
 }
 
