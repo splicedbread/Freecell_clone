@@ -24,7 +24,7 @@ Freecell::Freecell() : m_card_grabbed(false), m_Running(false), m_cheat_mode(fal
 		m_homecells[i].SetSize(13);
 	}
 
-	m_window.SetTitle("Freecell 2: The search for more money");
+	m_window.SetTitle("Freecell 2: The Search for More Money");
 }
 
 //cheating ctor
@@ -46,7 +46,7 @@ Freecell::Freecell(int specialnum) : m_card_grabbed(false), m_Running(false), m_
 		m_homecells[i].SetSize(13);
 	}
 
-	m_window.SetTitle("Freecell 2: The search for more money");
+	m_window.SetTitle("Freecell 2: Moichendising (cheat mode)");
 }
 
 //copy ctor
@@ -187,11 +187,9 @@ void Freecell::StartGame()
 		//update the window
 		WindowUpdate();
 
-		//if there was a movement that was valid, then move
-		//those items.
-		if (m_check_result == 1)
+		if (CheckWinCond())
 		{
-			MoveTo(m_numCards, m_new_col);
+			m_Running = false;
 		}
 	}
 	m_window.GetWindow().close();
@@ -361,28 +359,32 @@ bool Freecell::CheckOrder()
 			switch (travel->GetData().GetSuit())
 			{
 			case Card::SPADE: //if its a spade, check if the next card is a club
-				if (travel->GetNext()->GetData().GetSuit() == Card::CLUB)
+				if (travel->GetNext()->GetData().GetSuit() == Card::CLUB 
+					|| travel->GetNext()->GetData().GetSuit() == Card::SPADE)
 				{
 					flag = false;
 				}
 				break;
 
 			case Card::CLUB: //if its a club, check if next card is a spade
-				if (travel->GetNext()->GetData().GetSuit() == Card::SPADE)
+				if (travel->GetNext()->GetData().GetSuit() == Card::SPADE
+					|| travel->GetNext()->GetData().GetSuit() == Card::CLUB)
 				{
 					flag = false;
 				}
 				break;
 
 			case Card::HEART: //check for diamond
-				if (travel->GetNext()->GetData().GetSuit() == Card::DIAMOND)
+				if (travel->GetNext()->GetData().GetSuit() == Card::DIAMOND
+					|| travel->GetNext()->GetData().GetSuit() == Card::HEART)
 				{
 					flag = false;
 				}
 				break;
 
 			case Card::DIAMOND: //check for heart
-				if (travel->GetNext()->GetData().GetSuit() == Card::HEART)
+				if (travel->GetNext()->GetData().GetSuit() == Card::HEART
+					|| travel->GetNext()->GetData().GetSuit() == Card::DIAMOND)
 				{
 					flag = false;
 				}
@@ -390,7 +392,8 @@ bool Freecell::CheckOrder()
 			}
 
 			//check numerical order
-			if (flag && travel->GetData().GetFace() < travel->GetNext()->GetData().GetFace())
+			if (!(static_cast<int>(flag && travel->GetData().GetFace()) - 1 == 
+				static_cast<int>(travel->GetNext()->GetData().GetFace())))
 			{
 				flag = false;
 			}
@@ -422,11 +425,15 @@ void Freecell::GrabCard()
 			{
 				//by dividing by the offset, we can determine the array
 				//positioning
-				int cell_num = (m_Mouse_x / m_offset);
-				if (cell_num = 4)
+				int cell_num = 0;
+				cell_num = m_Mouse_x / m_offset;
+				if (cell_num == 4)
 				{
 					cell_num = 3;
 				}
+
+				std::cout << "x value: " << m_Mouse_x << std::endl;
+				std::cout << "cell num: " << cell_num << std::endl;
 
 				//check to see if there is cards there
 				if (cell_num < m_f_count)
@@ -434,10 +441,8 @@ void Freecell::GrabCard()
 					//load a copy of the card into ghost
 					m_ghost.Append(m_freecells[cell_num]);
 					m_ghost_count++;
-					if (1 <= MovementCheck())
-					{
-						m_card_grabbed = true;
-					}
+					
+					m_card_grabbed = true;
 				}
 			}
 			break; //end freecell case
@@ -535,6 +540,29 @@ void Freecell::GrabCard()
 	}
 }
 
+/*///////////////////////////////////////
+	MoveFreeCellsDown
+		after a freecell removal
+		the remaining freecell
+		cards get moved down in the array
+*////////////////////////////////////////
+void Freecell::MoveFreeCellsDown()
+{
+	if (m_f_count > 1)
+	{
+		//move everything down to left side of freecells
+		for (int i = 0; i < m_f_count && i < m_freecells.GetLength(); i++)
+		{
+			if (i == m_prev_freecell && i + 1 < m_freecells.GetLength())
+			{
+				Swap(m_freecells[i], m_freecells[i + 1]);
+				m_prev_freecell++; //keep shifting the empty free cell to the back.
+			}
+		}
+	}
+	m_f_count--;
+}
+
 /*/////////////////////////////////////////
 	Drop Card
 		attempts to drop a card (or cards)
@@ -546,7 +574,133 @@ void Freecell::GrabCard()
 *//////////////////////////////////////////
 void Freecell::DropCard()
 {
-	//temp purge m_ghost
+	if (m_card_grabbed)
+	{
+		switch (GetRegion())
+		{
+		case HOME: //homecells
+			//can only move 1 card at a time
+			if (m_ghost_count == 1)
+			{
+				//if its one card then proceed
+				//get the card in ghost suit to determine
+				//which column it needs to look into first
+				if (!m_homecells[m_ghost.First().GetSuit()].IsEmpty())
+				{
+					//if it is not empty, check if our value can fit
+					if (static_cast<int>(m_homecells[m_ghost.First().GetSuit()].Peek().GetFace()) + 1
+						== static_cast<int>(m_ghost.First().GetFace()))
+					{
+						//if the cards value is 1 more than the current card in the homecell
+						//then we can place our card into the homecell.
+						bool found = false;
+						int card_index = 0;
+						//first check if its in the freecells
+						for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
+						{
+							if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+							{
+								if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+								{
+									found = true;
+									card_index = i;
+								}
+							}
+						}
+
+						if (found)
+						{
+							//if the card was found in freecell, move it
+							//to the appropiate homecell
+							m_homecells[m_ghost.First().GetSuit()].Push(m_freecells[card_index]);
+							m_prev_freecell = card_index;
+							MoveFreeCellsDown();
+						}
+						else
+						{
+							//if not, then assume it was from the previous column
+							m_homecells[m_ghost.First().GetSuit()].Push(m_columns[m_old_col].Pop());
+						}
+					}
+				}
+				else if (m_ghost.First().GetFace() == Card::ACE)
+				{
+					//if it is empty, check if the card we are trying
+					//to move is the Ace of Spades
+					bool found = false;
+					int card_index = 0;
+					//first check if its in the freecells
+					for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
+					{
+						if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+						{
+							if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+							{
+								found = true;
+								card_index = i;
+							}
+						}
+					}
+
+					if (found)
+					{
+						//if the card was found in freecell, move it
+						//to the appropiate homecell
+						m_homecells[m_ghost.First().GetSuit()].Push(m_freecells[card_index]);
+						m_prev_freecell = card_index;
+						MoveFreeCellsDown();
+					}
+					else
+					{
+						//if not, then assume it was from the previous column
+						m_homecells[m_ghost.First().GetSuit()].Push(m_columns[m_old_col].Pop());
+					}
+				}
+			}
+			break;
+
+		case FREE: //freecells
+			if (m_ghost_count == 1)
+			{
+				//if it is empty, check if the card we are trying
+					//to move is the Ace of Spades
+				bool found = false;
+				int card_index = 0;
+				//first check if its in the freecells
+				for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
+				{
+					if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+					{
+						if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+						{
+							found = true;
+							card_index = i;
+						}
+					}
+				}
+
+				if (!found)
+				{
+					if (m_f_count < m_freecells.GetLength())
+					{
+						//should be coming from a column only tbh
+						m_freecells[m_f_count] = m_columns[m_old_col].Pop();
+						m_f_count++;
+					}
+				}
+			}
+			break;
+
+		case COLUMN: //columns
+
+			//we can move either 1 item or multiples
+
+
+			break;
+		}
+	}
+
+	//purge m_ghost
 	m_ghost.Purge();
 	m_ghost_count = 0;
 	m_card_grabbed = false;
@@ -592,7 +746,7 @@ bool Freecell::CheckWinCond()
 	}
 	
 	//check if any cards are left on the board.
-	for (int i = 0; i < m_columns.GetLength(); i++)
+	for (int i = 0; cond && i < m_columns.GetLength(); i++)
 	{
 		if (!m_columns[i].IsEmpty())
 		{
@@ -784,7 +938,7 @@ void Freecell::DrawFree()
 			if (!isGhost)
 			{
 				GroupObj temp(m_freecells[i].GetCard(true));
-				temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
+				temp.SetPos(i * m_offset * m_scale + col_x * m_scale, col_x * m_scale);
 				m_window.DrawObj(temp);
 			}
 		}
@@ -843,7 +997,7 @@ void Freecell::DrawHome()
 		if (!m_homecells[i].IsEmpty())
 		{
 			GroupObj temp(m_homecells[i].Peek().GetCard(true));
-			temp.SetPos(i * m_offset * m_scale + m_scale * m_padding, 0);
+			temp.SetPos(i * m_offset * m_scale + m_scale * horizontalGap * m_offset + 5 * m_scale, 20 * m_scale);
 			m_window.DrawObj(temp);
 		}
 	}

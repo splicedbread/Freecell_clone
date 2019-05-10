@@ -58,6 +58,7 @@ private:
 	void GrabCard();
 	void DropCard();
 	bool CheckOrder();
+	void MoveFreeCellsDown();
 
 	ElmRegion GetRegion();
 
@@ -128,7 +129,9 @@ private:
 
 	//board counters
 	int m_f_count; //freecell array count
+	int m_prev_freecell;
 	int m_col_counts[8];
+	int m_home_counts[4];
 	int m_empty_cols;
 };
 #endif // !FREECELL_H
