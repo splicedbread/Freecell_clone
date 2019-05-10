@@ -25,7 +25,7 @@ public:
 
 	enum ElmRegion
 	{
-		NONE, FREE, HOME, COLUMN
+		NONE, FREE, HOME, COLUMN, DOG
 	};
 
 	Freecell();
@@ -108,6 +108,8 @@ private:
 
 	int m_input_result;
 	int m_check_result;
+
+	bool m_restart;
 
 	//deck
 	Deck m_deck;

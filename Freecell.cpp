@@ -120,6 +120,33 @@ void Freecell::StartGame()
 	//setup phase
 	m_Running = true;
 
+	m_f_count = 0;
+	m_m1_pressed = false;
+	m_card_grabbed = false;
+
+	//initialization
+	m_freecells.SetLength(0);
+	m_freecells.SetLength(4);
+
+	m_homecells.SetLength(0);
+	m_homecells.SetLength(4);
+
+	for (int i = 0; i < m_homecells.GetLength(); i++)
+	{
+		m_homecells[i].SetSize(13);
+	}
+
+	m_columns.SetLength(0);
+	m_columns.SetLength(8);
+
+	m_ghost.Purge();
+	m_ghost_count = 0;
+
+	while (!m_holder.IsEmpty())
+	{
+		m_holder.Pop();
+	}
+
 	//if cheat mode is enabled, dont randomise the
 	//deck, because LoadDeck() does something special
 	m_deck.Reset();
@@ -192,7 +219,6 @@ void Freecell::StartGame()
 			m_Running = false;
 		}
 	}
-	m_window.GetWindow().close();
 }
 
 /*///////////////////////////////////////////////////////////
@@ -228,10 +254,17 @@ void Freecell::ChooseSize(Freecell::WindowSize size)
 	//get the scale that we will be using to display our cards
 	m_scale = (static_cast<float>(m_Xres) / static_cast<float>(MIN_X_RES));
 	m_deck.SetScale(m_scale / 8 + m_scale);
-	m_deck.Reset();
 	m_window.SetDimension(m_Xres, m_Yres);
-	m_window.Update();
-	StartGame();
+
+	do
+	{
+		m_restart = false;
+		m_deck.Reset();
+		m_window.Update();
+		StartGame();
+	} while (m_restart);
+
+	m_window.GetWindow().close();
 }
 
 /*//////////////////////////////////////////
@@ -333,6 +366,14 @@ Freecell::ElmRegion Freecell::GetRegion()
 		&& m_Mouse_y >= col_y && m_Mouse_y < m_Yres)
 	{
 		reg = COLUMN;
+	}
+
+	//Dog
+	else if (m_Mouse_x >= (5 * m_offset - 10) && m_Mouse_x < (7 * m_offset)
+		&& m_Mouse_y >= 20 && m_Mouse_y < 75)
+	{
+		m_restart = true;
+		m_Running = false;
 	}
 
 	return reg;
@@ -1345,7 +1386,14 @@ int Freecell::MovementCheck()
 	//# of available freecells + 1 + #of available colums * # of freecells
 	//however, lets instead choose the number of open free cells
 	//plus 1 for each empty column
-	cond = (4 - m_f_count) + (m_empty_cols * (4 - m_f_count)) + 1;
+	if (m_empty_cols >= 1)
+	{
+		cond = (4 - m_f_count) + ((m_empty_cols - 1) * (4 - m_f_count)) + 1;
+	}
+	else
+	{
+		cond = (4 - m_f_count) + 1;
+	}
 
 	return cond;
 }
