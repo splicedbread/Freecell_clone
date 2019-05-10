@@ -59,22 +59,28 @@ void Deck::Empty()
 */////////////////////////////////////////////////////////////
 void Deck::Randomise()
 {
-	//setting up the seed for the random number generator
-	std::chrono::high_resolution_clock clock;
-	std::chrono::high_resolution_clock::time_point period = clock.now();
-	std::chrono::high_resolution_clock::duration dur = std::chrono::high_resolution_clock::now() - period;
-	unsigned seed = dur.count();
-	gen.seed(seed);
-
-	int rngCardNum;
-	std::uniform_int_distribution<int> card_distribution(0, m_deck.GetLength() - 1);
-
-	for (int i = 0; i < m_deck.GetLength(); i++)
+	static int loops = 0;
+	if (loops < 6)
 	{
-		rngCardNum = card_distribution(gen);//generate an element from the deck
-		Swap(m_deck[i], m_deck[rngCardNum]); //swap those elements with the current selected one
-		card_distribution.reset(); // reset the rng num, just in case
+		//setting up the seed for the random number generator
+		std::chrono::high_resolution_clock clock;
+		std::chrono::high_resolution_clock::time_point period = clock.now();
+		std::chrono::high_resolution_clock::duration dur = std::chrono::high_resolution_clock::now() - period;
+		unsigned seed = dur.count();
+		gen.seed(seed);
+
+		int rngCardNum;
+		std::uniform_int_distribution<int> card_distribution(0, m_deck.GetLength() - 1);
+
+		for (int i = 0; i < m_deck.GetLength(); i++)
+		{
+			rngCardNum = card_distribution(gen);//generate an element from the deck
+			Swap(m_deck[i], m_deck[rngCardNum]); //swap those elements with the current selected one
+		}
+		loops++;
+		Randomise();
 	}
+	loops = 0;
 }
 
 //Return how many cards are in the deck
