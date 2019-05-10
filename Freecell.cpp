@@ -176,7 +176,6 @@ void Freecell::StartGame()
 		if (m_input_result == 1)
 		{
 			//mouse bttn press
-			std::cout << "result = 1.\n";
 			GrabCard();
 		}
 		else if (m_input_result == 0)
@@ -341,6 +340,67 @@ Freecell::ElmRegion Freecell::GetRegion()
 	return reg;
 }
 
+/*//////////////////////////////////////////////
+	Check Order
+		checks the order of the 
+		card in m_ghost
+		useful for determining if the cards were
+		grabbed or not
+*///////////////////////////////////////////////
+bool Freecell::CheckOrder()
+{
+	bool flag = true;
+
+	Node<Card>* travel = m_ghost.GetHead();
+
+	while (flag && travel != nullptr)
+	{
+		if (travel->GetNext() != nullptr)
+		{
+			//check coloring order
+			switch (travel->GetData().GetSuit())
+			{
+			case Card::SPADE: //if its a spade, check if the next card is a club
+				if (travel->GetNext()->GetData().GetSuit() == Card::CLUB)
+				{
+					flag = false;
+				}
+				break;
+
+			case Card::CLUB: //if its a club, check if next card is a spade
+				if (travel->GetNext()->GetData().GetSuit() == Card::SPADE)
+				{
+					flag = false;
+				}
+				break;
+
+			case Card::HEART: //check for diamond
+				if (travel->GetNext()->GetData().GetSuit() == Card::DIAMOND)
+				{
+					flag = false;
+				}
+				break;
+
+			case Card::DIAMOND: //check for heart
+				if (travel->GetNext()->GetData().GetSuit() == Card::HEART)
+				{
+					flag = false;
+				}
+				break;
+			}
+
+			//check numerical order
+			if (flag && travel->GetData().GetFace() < travel->GetNext()->GetData().GetFace())
+			{
+				flag = false;
+			}
+		}
+		travel = travel->GetNext();
+	}
+
+	return flag;
+}
+
 /*///////////////////////////////////////////////////////
 	Grab Card
 		attempts to resolve the coordinates at the mouse
@@ -369,11 +429,15 @@ void Freecell::GrabCard()
 				}
 
 				//check to see if there is cards there
-				if (cell_num <= m_f_count - 1)
+				if (cell_num < m_f_count)
 				{
 					//load a copy of the card into ghost
 					m_ghost.Append(m_freecells[cell_num]);
 					m_ghost_count++;
+					if (1 <= MovementCheck())
+					{
+						m_card_grabbed = true;
+					}
 				}
 			}
 			break; //end freecell case
@@ -448,9 +512,7 @@ void Freecell::GrabCard()
 							//now cards should be in ghost to be transitioned
 							//around the board visually.
 							//set grabbed to true
-							m_card_grabbed = true;
-							std::cout << "column #: " << m_old_col << std::endl;
-							std::cout << "card: " << m_card_in_col << std::endl;
+							m_card_grabbed = CheckOrder();
 						}
 					}
 				}
@@ -466,9 +528,14 @@ void Freecell::GrabCard()
 	{
 		DropCard();
 	}
+
+	if (!m_card_grabbed)
+	{
+		DropCard();
+	}
 }
 
-/*
+/*/////////////////////////////////////////
 	Drop Card
 		attempts to drop a card (or cards)
 		into a spot 
@@ -476,7 +543,7 @@ void Freecell::GrabCard()
 
 		if not valid, the ghost cards
 		are removed
-*/
+*//////////////////////////////////////////
 void Freecell::DropCard()
 {
 	//temp purge m_ghost

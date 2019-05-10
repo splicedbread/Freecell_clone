@@ -57,13 +57,14 @@ private:
 	//hidden grabbing / dropping function
 	void GrabCard();
 	void DropCard();
+	bool CheckOrder();
 
 	ElmRegion GetRegion();
 
 
 	//constants used for displaying
 	const int m_offset = 70;
-	const int m_padding = 2;
+	const int m_padding = 1;
 
 	const int col_x = 20;
 	const int col_y = 95;
