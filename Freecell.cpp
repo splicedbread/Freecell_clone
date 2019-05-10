@@ -173,14 +173,20 @@ void Freecell::StartGame()
 		//user input (get mouse coords / mouse clicks)
 		m_input_result = UserInput();
 
+		if (m_input_result == 1)
+		{
+			//mouse bttn press
+			std::cout << "result = 1.\n";
+			GrabCard();
+		}
+		else if (m_input_result == 0)
+		{
+			//mouse bttn release
+			DropCard();
+		}
+
 		//update the window
 		WindowUpdate();
-
-		//user validation on a move
-		if (m_input_result == 0)
-		{
-			m_check_result = MovementCheck();
-		}
 
 		//if there was a movement that was valid, then move
 		//those items.
@@ -249,18 +255,9 @@ void Freecell::WindowUpdate()
 
 		//ghost cards are the last thing drawn to the buffer
 		//because they 'sit' on top of everything else
-		if (m_m1_pressed)
+		if (m_m1_pressed && m_card_grabbed)
 		{
 			DrawGhost();
-		}
-		else
-		{
-			if (!m_ghost.IsEmpty())
-			{
-				//purge the ghost if a release has occured
-				//and cards were in ghost
-				DropCard();
-			}
 		}
 
 		//after everything is drawn, update the screen
@@ -314,10 +311,10 @@ int Freecell::UserInput()
 	return cond;
 }
 
-/*
+/*////////////////////////////////////////////////////////////
 	Get Region
 		A tool for getting the general region the mouse is in
-*/
+*/////////////////////////////////////////////////////////////
 Freecell::ElmRegion Freecell::GetRegion()
 {
 	ElmRegion reg = NONE;
@@ -344,12 +341,12 @@ Freecell::ElmRegion Freecell::GetRegion()
 	return reg;
 }
 
-/*
+/*///////////////////////////////////////////////////////
 	Grab Card
 		attempts to resolve the coordinates at the mouse
 		and place that associated card and any below it
 		into ghost.
-*/
+*////////////////////////////////////////////////////////
 void Freecell::GrabCard()
 {
 	if (m_m1_pressed && !m_card_grabbed)
@@ -388,6 +385,76 @@ void Freecell::GrabCard()
 		case COLUMN: //column region
 			//a little tricky, but there is a formula per card. 
 			//first determine which column we /could/ be looking at
+			m_old_col = m_Mouse_x / m_offset;
+			//to make sure the full width of the cards is explored
+			//and nothing is grabbed from inbetween card spaces
+			
+
+			if (m_Mouse_x % m_offset < 5 || m_Mouse_x % m_offset > 20)
+			{
+				//not in margins, on a definite card column
+				if (m_Mouse_x % m_offset <= 1)
+				{
+					//if on the right edge of a card, we want to insure we dont
+					//grab the other column by mistake
+					m_old_col--;
+				}
+
+				if (m_old_col > m_columns.GetLength() - 1)
+				{
+					m_old_col = m_columns.GetLength() - 1;
+				}
+
+				//now find which card we are looking at
+				if (!m_columns[m_old_col].IsEmpty())
+				{
+					//get the amound of cards that are in the column
+					int num_c_card = m_col_counts[m_old_col];
+					num_c_card--; //gets the index of the last card
+
+
+					//check the boundry of the stack of cards
+					if (m_Mouse_y <= (col_y * m_scale + (num_c_card + 1) * card_space * m_scale + 50 * m_scale))
+					{
+						m_card_in_col = (m_Mouse_y - col_y) / card_space; //calculate the index value of the card touched
+						//if the y position of the mouse is within the cards available
+						//check for grabbing of last card
+						if (m_card_in_col > num_c_card)
+						{
+							m_card_in_col--; //decrement to match the card in the last
+							//position of the stack
+						}
+
+						//check if we can grab this (these) cards
+						if (((num_c_card + 1) - m_card_in_col) <= MovementCheck())
+						{
+							//if it passed the movement check, then load the cards into
+							//the holder while prepending them to ghost
+							for (int i = 0; i < (num_c_card + 1) - m_card_in_col; i++)
+							{
+								m_ghost.Prepend(m_columns[m_old_col].Peek());
+								m_ghost_count++;
+								m_holder.Push(m_columns[m_old_col].Pop());
+							}
+
+							//once copies are in ghost, push everything from
+							//holder back to the colum they belonged to
+
+							while (!m_holder.IsEmpty())
+							{
+								m_columns[m_old_col].Push(m_holder.Pop());
+							}
+
+							//now cards should be in ghost to be transitioned
+							//around the board visually.
+							//set grabbed to true
+							m_card_grabbed = true;
+							std::cout << "column #: " << m_old_col << std::endl;
+							std::cout << "card: " << m_card_in_col << std::endl;
+						}
+					}
+				}
+			}
 			break;
 
 		default:
@@ -412,7 +479,10 @@ void Freecell::GrabCard()
 */
 void Freecell::DropCard()
 {
-
+	//temp purge m_ghost
+	m_ghost.Purge();
+	m_ghost_count = 0;
+	m_card_grabbed = false;
 }
 
 /*//////////////////////////////////////////////
@@ -431,7 +501,7 @@ int Freecell::MovementCheck()
 	//# of available freecells + 1 + #of available colums * # of freecells
 	//however, lets instead choose the number of open free cells
 	//plus 1 for each empty column
-	cond = (4 - m_f_count) + (m_empty_cols);
+	cond = (4 - m_f_count) + (m_empty_cols) + 1;
 
 	return cond;
 }
@@ -545,7 +615,28 @@ void Freecell::LoadDeck()
 void Freecell::DrawGhost()
 {
 	//temporarily cout
-	std::cout << "Mouse Coords: " << m_Mouse_x << ',' << m_Mouse_y << std::endl;
+	//std::cout << "Mouse Coords: " << m_Mouse_x << ',' << m_Mouse_y << std::endl;
+
+	if (!m_ghost.IsEmpty())
+	{
+		Node<Card>* travel = m_ghost.GetHead();
+		int num_card = 0;
+		//display everything in ghost relative to mouse
+		while (travel != nullptr)
+		{
+			GroupObj temp = travel->GetData().GetCard(true);
+
+			//position relative to mouse cursor
+			temp.SetPos(m_Mouse_x * m_scale - 25 * m_scale,
+				m_Mouse_y * m_scale + num_card * card_space * m_scale - 25 * m_scale);
+
+			num_card++; //increment the num of cards displayed
+
+			m_window.DrawObj(temp);
+
+			travel = travel->GetNext();
+		}
+	}
 }
 
 /*//////////////////////////////////////////////////////////////////////

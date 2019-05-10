@@ -16,7 +16,7 @@ WDManager::WDManager() : m_x_size(MIN_X_RES), m_y_size(MIN_Y_RES), m_title(nullp
 	strcpy(m_title, "Freecell - The Unoriginal Card Game - JV");
 
 	m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
-	m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+	m_window.setFramerateLimit(G_FRAMERATE); //framerate limit of 60, no need for 3000frames
 	Update();
 }
 
@@ -51,7 +51,7 @@ WDManager::WDManager(int x, int y) : m_x_size(MIN_X_RES), m_y_size(MIN_Y_RES), m
 	}
 
 	m_window.create(VideoMode(m_x_size, m_y_size), m_title, Style::Titlebar | Style::Close);
-	m_window.setFramerateLimit(60); //framerate limit of 60, no need for 3000frames
+	m_window.setFramerateLimit(G_FRAMERATE); //framerate limit of 60, no need for 3000frames
 	Update();
 }
 

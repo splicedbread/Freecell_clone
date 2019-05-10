@@ -89,6 +89,7 @@ private:
 	//cards moving to
 	int m_numCards;
 	int m_new_col;
+	int m_card_in_col;
 	int m_old_col;
 
 	//window

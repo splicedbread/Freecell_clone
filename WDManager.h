@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#define G_FRAMERATE 90
+
 #define MIN_X_RES 848
 #define MIN_Y_RES 477
 
