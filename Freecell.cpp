@@ -828,9 +828,9 @@ void Freecell::DropCard()
 								bool store_flag = false; //is this a valid storage space
 								int freeCount = 0;
 
-								if (m_ghost_count > 0)
+								if (m_ghost_count > 1)
 								{
-									while (moved <= m_ghost_count)
+									while (moved < m_ghost_count)
 									{
 										//move as many cards as we can into freecell first
 										for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--)
@@ -840,12 +840,7 @@ void Freecell::DropCard()
 												//if the next itteration is the last card in ghost
 												if (moved + 1 == m_ghost_count)
 												{
-
-													//then move it from its column to the new column first
-													if (!m_columns[m_new_col].IsEmpty())
-													{
-														m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
-													}
+													m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
 												}
 												else
 												{
@@ -929,6 +924,10 @@ void Freecell::DropCard()
 											}
 										}
 									}
+								}
+								else if (m_ghost_count == 1)
+								{
+									m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
 								}
 							}
 						}
