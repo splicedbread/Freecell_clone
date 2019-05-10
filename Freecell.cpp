@@ -375,6 +375,8 @@ void Freecell::GrabCard()
 				if (cell_num <= m_f_count - 1)
 				{
 					//load a copy of the card into ghost
+					m_ghost.Append(m_freecells[cell_num]);
+					m_ghost_count++;
 				}
 			}
 			break; //end freecell case
