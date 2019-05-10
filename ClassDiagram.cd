@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="Array&lt;T&gt;">
+    <Position X="3.75" Y="10" Width="3" />
+    <NestedTypes>
+      <Typedef Name="Array&lt;T&gt;::value_type" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Array.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AACAAAAIAAAASAAABAAAAAAAAEkAAABAAAAgAAAIAAA=</HashCode>
+      <FileName>Array.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LinkedList&lt;T&gt;">
+    <Position X="8.25" Y="0.5" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AABAAAIAIBAgQQAAAAFAJQAAEAAgQQAAAAAiAIAAAAA=</HashCode>
+      <FileName>LinkedList.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LStack&lt;T&gt;">
+    <Position X="3.75" Y="2.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAEAEkAAAAAACAAgAAACAAAAAAAAgAAAACAA=</HashCode>
+      <FileName>LStack.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Node&lt;T&gt;">
+    <Position X="0.5" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAgAAAIAAASAAAAAAAAIAAAgAAgEAAAA=</HashCode>
+      <FileName>Node.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stack&lt;T&gt;">
+    <Position X="3.75" Y="5.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAEAEgAAACAAIAAgAgACAAAAIAAAgAAAACAA=</HashCode>
+      <FileName>Stack.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Card">
+    <Position X="6.5" Y="15" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="Card::CardType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>card.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Card::CardSuit" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>card.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AABCAAAgAAAAQCAEAAAAEQAAQAAAAAAAQAAgAkAAAAQ=</HashCode>
+      <FileName>card.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Deck">
+    <Position X="3.75" Y="15" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAABiCAAAJAQAAAAAAAQAAAAARAAgAAAAA=</HashCode>
+      <FileName>deck.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DrawableObj">
+    <Position X="8.75" Y="6" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>EIAEgQAAAAIAACAAAAACAQAIAAAASAAEIAAgQkAgBAA=</HashCode>
+      <FileName>DrawableObj.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Freecell">
+    <Position X="0.5" Y="6.5" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="Freecell::WindowSize" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Freecell.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Freecell::ElmRegion" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Freecell.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>CAEgACIgm0AMgCAAAQQAAQQoAhAMpCUCgD0MGABqIIE=</HashCode>
+      <FileName>Freecell.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GroupObj">
+    <Position X="12.75" Y="5.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>EIAAAFACQAAAAAAAgAAABAABAAAAACCAAAAgQAAgBAA=</HashCode>
+      <FileName>GroupObj.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WDManager">
+    <Position X="12.5" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>CAQAAAAEQAAAAAAAAAQAAABAAAQAAAAAABIoAECCAAA=</HashCode>
+      <FileName>WDManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Exception">
+    <Position X="10" Y="12.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAAAAAAAAIAEAAAAABAAABgAAAAAAA=</HashCode>
+      <FileName>Exception.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

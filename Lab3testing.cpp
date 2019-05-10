@@ -1,10 +1,44 @@
+#define _CRTDBG_MAP_ALLOC
 #include "Freecell.h"
 #include <iostream>
+#include <Windows.h>
+#include <crtdbg.h>
 
 using std::cin;
 using std::cout;
+using std::endl;
+
+/*//////////////////////////////////////////
+	Project Name: Freecell
+	Author: Jacob Vanderkarr
+	Date (finished) 5/10 (I know its late)
+
+	Purpose:
+		A game that you play freecell and such
+
+	Notes: Click the center symbol to 
+		restart a game
+
+	Notes ps: 
+		I know I turned this in late, its no 
+		big deal because I had learned a few things
+		about graphical processes and events
+
+		I see this as a total win.
+
+*////////////////////////////////////////////
+void gameStub();
 
 int main()
+{
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	cout << "launching openGL application...." << endl;
+	//Remove the console window
+	gameStub();
+	return 0;
+}
+
+void gameStub()
 {
 	int selection;
 	//ask the user for the size
@@ -24,61 +58,9 @@ int main()
 
 	} while (selection < 1 || selection > 3);
 
+	FreeConsole(); //Comment out when needing the console for debugging
+
 	Freecell game;
 	game.ChooseSize(static_cast<Freecell::WindowSize>(selection - 1));
 
-	//previous testing code
-	//char source[5][50] = {"./Resources/CardBlank.png", "./Resources/Ace.png", "./Resources/Heart.png"};
-
-	//int x = 1600;
-	//int y = 900;
-
-	//WDManager working(x, y);
-
-	////working.SetDimension(1920, 1080);
-
-	////working.SetDimension(MIN_X_RES, MIN_Y_RES);
-
-	//Deck myDeck;
-	//GroupObj myGroup;
-
-	//float scale = static_cast<float>(x) / static_cast<float>(MIN_X_RES);
-
-	//myDeck.SetScale(scale);
-	//myDeck.Reset();
-	////myDeck.Randomise();
-
-	//try
-	//{
-	//	int i = 20 * scale;
-	//	int j = 20 * scale;
-	//	while (myDeck.GetSize() > 0)
-	//	{
-	//		myGroup = myDeck.Draw().GetCard(true);
-	//		myGroup.SetPos(i, j);
-	//		working.DrawObj(myGroup);
-	//		i += 50 * scale;
-	//		if (i >= 650 * scale)
-	//		{
-	//			i = 20 * scale;
-	//			j += 50 * scale;
-	//		}
-	//	}
-	//}
-	//catch (Exception except)
-	//{
-	//	std::cout << except.GetMessage() << std::endl;
-	//}
-
-	//working.SetTitle("Bill & Ted's fabulous Freecell Adventure - Test");
-
-	//working.Update();
-
-	//cin.ignore();
-
-	//working.SetTitle("Something differnt after we are gone");
-
-	//cin.ignore();
-
-	return 0;
 }
