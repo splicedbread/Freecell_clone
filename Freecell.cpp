@@ -585,7 +585,7 @@ void Freecell::DropCard()
 				//if its one card then proceed
 				//get the card in ghost suit to determine
 				//which column it needs to look into first
-				if (!m_homecells[m_ghost.First().GetSuit()].IsEmpty())
+				if (!m_ghost.IsEmpty() && !m_homecells[m_ghost.First().GetSuit()].IsEmpty())
 				{
 					//if it is not empty, check if our value can fit
 					if (static_cast<int>(m_homecells[m_ghost.First().GetSuit()].Peek().GetFace()) + 1
@@ -598,12 +598,15 @@ void Freecell::DropCard()
 						//first check if its in the freecells
 						for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
 						{
-							if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+							if (!m_ghost.IsEmpty())
 							{
-								if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+								if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
 								{
-									found = true;
-									card_index = i;
+									if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+									{
+										found = true;
+										card_index = i;
+									}
 								}
 							}
 						}
@@ -619,11 +622,14 @@ void Freecell::DropCard()
 						else
 						{
 							//if not, then assume it was from the previous column
-							m_homecells[m_ghost.First().GetSuit()].Push(m_columns[m_old_col].Pop());
+							if (!m_ghost.IsEmpty())
+							{
+								m_homecells[m_ghost.First().GetSuit()].Push(m_columns[m_old_col].Pop());
+							}
 						}
 					}
 				}
-				else if (m_ghost.First().GetFace() == Card::ACE)
+				else if (!m_ghost.IsEmpty() && m_ghost.First().GetFace() == Card::ACE)
 				{
 					//if it is empty, check if the card we are trying
 					//to move is the Ace of Spades
@@ -632,12 +638,15 @@ void Freecell::DropCard()
 					//first check if its in the freecells
 					for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
 					{
-						if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+						if (!m_ghost.IsEmpty())
 						{
-							if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+							if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
 							{
-								found = true;
-								card_index = i;
+								if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+								{
+									found = true;
+									card_index = i;
+								}
 							}
 						}
 					}
@@ -660,7 +669,7 @@ void Freecell::DropCard()
 			break;
 
 		case FREE: //freecells
-			if (m_ghost_count == 1)
+			if (m_ghost_count == 1 && !m_ghost.IsEmpty())
 			{
 				//if it is empty, check if the card we are trying
 					//to move is the Ace of Spades
@@ -669,12 +678,15 @@ void Freecell::DropCard()
 				//first check if its in the freecells
 				for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
 				{
-					if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+					if (!m_ghost.IsEmpty())
 					{
-						if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+						if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
 						{
-							found = true;
-							card_index = i;
+							if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+							{
+								found = true;
+								card_index = i;
+							}
 						}
 					}
 				}
@@ -694,8 +706,338 @@ void Freecell::DropCard()
 		case COLUMN: //columns
 
 			//we can move either 1 item or multiples
+			//a little tricky, but there is a formula per card. 
+			//first determine which column we /could/ be looking at
+			m_new_col = m_Mouse_x / m_offset;
+			//to make sure the full width of the cards is explored
+			//and nothing is grabbed from inbetween card spaces
 
 
+			if (m_Mouse_x % m_offset < 5 || m_Mouse_x % m_offset > 20)
+			{
+				//not in margins, on a definite card column
+				if (m_Mouse_x % m_offset <= 1)
+				{
+					//if on the right edge of a card, we want to insure we dont
+					//grab the other column by mistake
+					m_new_col--;
+				}
+
+				if (m_new_col > m_columns.GetLength() - 1)
+				{
+					m_new_col = m_columns.GetLength() - 1;
+				}
+
+				//ensure this is a new col we want to look at
+				if (m_new_col != m_old_col);
+				{
+					if (m_columns[m_new_col].IsEmpty() && !m_ghost.IsEmpty())
+					{
+						//if the new column is empty
+						//check freecell for the value first
+						//if it is empty, check if the card we are trying
+						//to move is the Ace of Spades
+						bool found = false;
+						int card_index = 0;
+						//first check if its in the freecells
+						for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
+						{
+							if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+							{
+								if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+								{
+									found = true;
+									card_index = i;
+								}
+							}
+						}
+
+						if (found)
+						{
+							//if the card is in freecell, assume there is only 1
+							//and move it to the open spot
+						
+							m_columns[m_new_col].Push(m_freecells[card_index]);
+							m_prev_freecell = card_index;
+							MoveFreeCellsDown();
+						}
+						else
+						{
+							/*
+								if its not found in freecells
+								then we are to assume that it is coming
+								from another column. 
+								
+								we have to check for 2 things
+								1. if the amount of cards we can move is valid
+								2. moving them
+							*/
+							//create a travel node from the tail
+							Node<Card>* travel = m_ghost.GetTail();
+
+							int allowedMovement = MovementCheck() - ((m_empty_cols - 1) * (m_freecells.GetLength() - m_f_count));
+
+							//because we are moving *to* an empty column, we have to discount 1 space in movement
+							if (m_ghost_count <= allowedMovement)
+							{
+								int moved = 0; //how many cards have been moved
+								int storage = 0; //how many storage spaces have we used
+								int track = 0; //how many storage spaces have we used and passed
+								bool store_flag = false; //is this a valid storage space
+								int freeCount = 0;
+
+								if (m_ghost_count > 0)
+								{
+									while (moved <= m_ghost_count)
+									{
+										//move as many cards as we can into freecell first
+										for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--, moved++)
+										{
+											if (travel->GetData() == m_columns[m_old_col].Peek())
+											{
+												//if that is the same as the columns top push it into a freecell
+												m_freecells[i] = m_columns[m_old_col].Pop();
+												freeCount++;
+
+												//if the next itteration is the last card in ghost
+												if (moved + 1 == m_ghost_count)
+												{
+													//then move it from its column to the new column first
+													if (!m_columns[m_new_col].IsEmpty())
+													{
+														m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
+													}
+												}
+											}
+
+											travel = travel->GetPrevious();
+										}
+
+										//if moved is still less than ghost count, then load our stored cards in freecell
+										//into an empty column
+										if (moved < m_ghost_count)
+										{
+											track = storage;
+											for (int j = 0; !store_flag && j < m_columns.GetLength(); j++)
+											{
+												if (m_col_counts[j] == 0)
+												{
+													if (track == 0)
+													{
+														store_flag = true;
+													}
+													else
+													{
+														track--;
+													}
+												}
+
+												//if a valid storage has been found
+												if (store_flag)
+												{
+													//put everything that we can from free cell into a blank column
+													for (int i = m_f_count; i < m_freecells.GetLength(); i++)
+													{
+														m_columns[j].Push(m_freecells[i]);
+														freeCount--;
+													}
+													storage++;
+												}
+											}
+										}
+										else
+										{
+											//consolidate all the storages starting with current freecell
+											//then left storages are consilidated
+											for (int i = m_freecells.GetLength() - freeCount; i < m_freecells.GetLength(); i++)
+											{
+												m_columns[m_new_col].Push(m_freecells[i]);
+											}
+											freeCount = 0;
+
+											//after the freecell values have been put into the new column
+											//consolodate all the storeage
+											for (int i = m_columns.GetLength() - 1; i > 0; i--)
+											{
+												int dex = m_f_count;
+												//if a columns count is zero, but is not empty, we used 
+												//it for storage
+												if (m_col_counts[i] == 0 && !m_columns[i].IsEmpty())
+												{
+													//if the count is 0 and the column is not empty, unload it into freecell
+													while (!m_columns[i].IsEmpty())
+													{
+														m_freecells[dex] = m_columns[i].Pop();
+														dex++;
+													}
+
+													//then empty freecell back into the new column
+													for (int j = m_f_count; j < m_freecells.GetLength(); j++)
+													{
+														m_columns[m_new_col].Push(m_freecells[j]);
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						//if the new column is not empty
+						//check freecell for the value first
+						bool found = false;
+						int card_index = 0;
+						//first check if its in the freecells
+						for (int i = 0; !found && i < m_freecells.GetLength() && i < m_f_count; i++)
+						{
+							if (!m_ghost.IsEmpty())
+							{
+								if (m_ghost.First().GetSuit() == m_freecells[i].GetSuit())
+								{
+									if (m_ghost.First().GetFace() == m_freecells[i].GetFace())
+									{
+										found = true;
+										card_index = i;
+									}
+								}
+							}
+						}
+
+						if (found && !m_ghost.IsEmpty())
+						{
+							//if the card is in freecell, assume there is only 1
+							//and move it to the open spot
+							m_columns[m_new_col].Push(m_freecells[card_index]);
+							m_prev_freecell = card_index;
+							MoveFreeCellsDown();
+						}
+						else
+						{
+							//the column is not empty
+						/*
+							if its not found in freecells
+							then we are to assume that it is coming
+							from another column.
+
+							we have to check for 2 things
+							1. if the amount of cards we can move is valid
+							2. moving them
+						*/
+						//create a travel node from the tail
+							Node<Card>* travel = m_ghost.GetTail();
+
+							int allowedMovement = MovementCheck();
+
+							//because we are moving *to* an empty column, we have to discount 1 space in movement
+							//also need to check if 
+							if (m_ghost_count <= allowedMovement && m_ghost_count > 0)
+							{
+								int moved = 0; //how many cards have been moved
+								int storage = 0; //how many storage spaces have we used
+								int track = 0; //how many storage spaces have we used and passed
+								bool store_flag = false; //is this a valid storage space
+								int freeCount = 0;
+
+								while (moved <= m_ghost_count)
+								{
+									//move as many cards as we can into freecell first
+									for (int i = m_freecells.GetLength() - 1; travel != nullptr && moved < m_ghost_count && i > m_f_count - 1; i--, moved++)
+									{
+										if (travel->GetData() == m_columns[m_old_col].Peek())
+										{
+											//if that is the same as the columns top push it into a freecell
+											m_freecells[i] = m_columns[m_old_col].Pop();
+											freeCount++;
+
+											//if the next itteration is the last card in ghost
+											if (moved + 1 == m_ghost_count)
+											{
+												//then move it from its column to the new column first
+												if (!m_columns[m_old_col].IsEmpty())
+												{
+													m_columns[m_new_col].Push(m_columns[m_old_col].Pop());
+												}
+											}
+										}
+
+										travel = travel->GetPrevious();
+									}
+
+									//if moved is still less than ghost count, then load our stored cards in freecell
+									//into an empty column
+									if (moved < m_ghost_count)
+									{
+										track = storage;
+										for (int j = 0; !store_flag && j < m_columns.GetLength(); j++)
+										{
+											if (m_col_counts[j] == 0)
+											{
+												if (track == 0)
+												{
+													store_flag = true;
+												}
+												else
+												{
+													track--;
+												}
+											}
+
+											//if a valid storage has been found
+											if (store_flag)
+											{
+												//put everything that we can from free cell into a blank column
+												for (int i = m_f_count; i < m_freecells.GetLength(); i++)
+												{
+													m_columns[j].Push(m_freecells[i]);
+													freeCount--;
+												}
+												storage++;
+											}
+										}
+									}
+									else
+									{
+										//consolidate all the storages starting with current freecell
+										//then left storages are consilidated
+										for (int i = m_freecells.GetLength() - freeCount; i < m_freecells.GetLength(); i++)
+										{
+											m_columns[m_new_col].Push(m_freecells[i]);
+										}
+										freeCount = 0;
+
+										//after the freecell values have been put into the new column
+										//consolodate all the storeage
+										for (int i = m_columns.GetLength() - 1; i > 0; i--)
+										{
+											int dex = m_f_count;
+											//if a columns count is zero, but is not empty, we used 
+											//it for storage
+											if (m_col_counts[i] == 0 && !m_columns[i].IsEmpty())
+											{
+												//if the count is 0 and the column is not empty, unload it into freecell
+												while (!m_columns[i].IsEmpty())
+												{
+													m_freecells[dex] = m_columns[i].Pop();
+													dex++;
+												}
+
+												//then empty freecell back into the new column
+												for (int j = m_f_count; j < m_freecells.GetLength(); j++)
+												{
+													m_columns[m_new_col].Push(m_freecells[j]);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			break;
 		}
 	}
@@ -703,6 +1045,7 @@ void Freecell::DropCard()
 	//purge m_ghost
 	m_ghost.Purge();
 	m_ghost_count = 0;
+	m_old_col = 0;
 	m_card_grabbed = false;
 }
 
@@ -722,7 +1065,7 @@ int Freecell::MovementCheck()
 	//# of available freecells + 1 + #of available colums * # of freecells
 	//however, lets instead choose the number of open free cells
 	//plus 1 for each empty column
-	cond = (4 - m_f_count) + (m_empty_cols) + 1;
+	cond = (4 - m_f_count) + (m_empty_cols * (4 - m_f_count)) + 1;
 
 	return cond;
 }
@@ -755,21 +1098,6 @@ bool Freecell::CheckWinCond()
 	}
 
 	return cond;
-}
-
-/*
-	MoveTo
-		after a valid movement check,
-		move the amount of cards
-		requested to the new location
-
-		0-7 is the board columns
-		8 is freecells (checks if there is open space first)
-		9 is homecells (checks if just one card is being moved)
-*/
-void Freecell::MoveTo(int numOfCards, int column)
-{
-
 }
 
 /*////////////////////////////////////////////////

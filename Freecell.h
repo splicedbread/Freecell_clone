@@ -40,8 +40,6 @@ public:
 	//int UndoMove(); //might not get implemented
 	bool CheckWinCond(); //all cards are in homecell ie all columns are empty
 
-	void MoveTo(int numOfCards, int column);
-
 	//Display helper functions
 	void DrawGhost();
 	void DrawFree();
