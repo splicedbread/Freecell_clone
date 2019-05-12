@@ -141,7 +141,7 @@ T & LinkedList<T>::Last() const
 template <typename T>
 void LinkedList<T>::Append(T in)
 {
-	if (m_head == nullptr)
+	if (m_head == nullptr && m_tail == nullptr)
 	{
 		m_head = new Node<T>(in);
 		m_tail = m_head;
@@ -150,9 +150,10 @@ void LinkedList<T>::Append(T in)
 	{
 		m_tail->m_next = new Node<T>(in);
 		m_tail->m_next->m_prev = m_tail;
-		m_tail->m_next->m_next = nullptr;
 		m_tail = m_tail->m_next;
+		m_tail->m_next = nullptr;
 	}
+
 }
 
 /*////////////////////////////////////////////////////
@@ -161,7 +162,7 @@ void LinkedList<T>::Append(T in)
 template <typename T>
 void LinkedList<T>::Prepend(T in)
 {
-	if (m_head == nullptr)
+	if (m_head == nullptr && m_tail == nullptr)
 	{
 		m_head = new Node<T>(in);
 		m_tail = m_head;
@@ -170,8 +171,8 @@ void LinkedList<T>::Prepend(T in)
 	{
 		m_head->m_prev = new Node<T>(in);
 		m_head->m_prev->m_next = m_head;
-		m_head->m_prev->m_prev = nullptr;
 		m_head = m_head->m_prev;
+		m_head->m_prev = nullptr;
 	}
 }
 
@@ -200,8 +201,8 @@ void LinkedList<T>::InsertAfter(T new_item, T old_item)
 				{
 					travel->m_next = new Node<T>(new_item); //tails next is now the new node
 					travel->m_next->m_prev = travel; //tails nexts previous is the tail
-					travel->m_next->m_next = nullptr; //new nodes next is nullptr
 					m_tail = travel->m_next; //new node is the new tail
+					m_tail->m_next = nullptr; //tail next is nullptr
 				}
 				else
 				{
@@ -246,8 +247,8 @@ void LinkedList<T>::InsertBefore(T new_item, T old_item)
 				{
 					travel->m_prev = new Node<T>(new_item); //heads prev is now the new node
 					travel->m_prev->m_next = travel; //heads prevs next is the head
-					travel->m_prev->m_prev = nullptr; //new nodes prev is nullptr
 					m_head = travel->m_prev; //new node is the new head
+					m_head->m_prev = nullptr; //new nodes prev is nullptr
 				}
 				else
 				{
@@ -282,24 +283,43 @@ bool LinkedList<T>::Extract(T out)
 	{
 		travel = travel->m_next;
 	}
-
-	if (travel != nullptr)
+	if (!(travel == m_head && travel == m_tail))
 	{
+		if (travel != nullptr)
+		{
+			found = true;
+			if (travel != m_head && travel != m_tail)
+			{
+				travel->m_next->m_prev = travel->m_prev;
+				travel->m_prev->m_next = travel->m_next;
+			}
+			else if (travel == m_head)
+			{
+				m_head = m_head->m_next;
+			}
+			else
+			{
+				m_tail = m_tail->m_prev;
+			}
+		}
+	}
+	else
+	{
+		m_head = nullptr;
+		m_tail = nullptr;
 		found = true;
-		if (travel != m_head && travel != m_tail)
-		{
-			travel->m_next->m_prev = travel->m_prev;
-			travel->m_prev->m_next = travel->m_next;
-		}
-		else if (travel == m_head)
-		{
-			m_head = m_head->m_next;
-		}
-		else
-		{
-			m_tail = m_tail->m_prev;
-		}
-		delete travel;
+	}
+	
+	delete travel;
+
+	if (m_head != nullptr)
+	{
+		m_head->m_prev = nullptr;
+	}
+
+	if (m_tail != nullptr)
+	{
+		m_tail->m_next = nullptr;
 	}
 
 	if (found == false)
